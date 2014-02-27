@@ -3,15 +3,15 @@ title: Templates
 slug: templates
 date: 0003/01/01
 number: 3
-contents: Learn about Meteor's templating language, Handlebars.|Create your first three templates.|Learn how Meteor managers work.|Get a basic prototype working with static data.
+contents: Aprenda sobre a linguagem de templating do Meteor, a Handlebars.|Crie seus primeiros três templates.|Aprenda como os gerenciadores Meteor funcionam.|Tenha um protótipo básico funcionando com dados estáticos.
 paragraphs: 46
 ---
 
-////
+Para facilitar o desenvolvimento em Meteor, nós adotaremos uma abordagem de fora para dentro. Em outras palavras, nós iremos constuir uma casca externa "burra" com HTML/JavaScript primeiro, e então associar com o funcionamento interno de nosso aplicativo no subsequentes trabalhos.
 
-////
+Isto significa que neste capítulo nós apenas nos preocuparemos com o que está acontecendo dentro do diretório /client.
 
-////
+Vamos criar um novo arquivo chamado main.html dentro de nosso diretório /client, e vamos preenchê-lo com o seguinte código:
 
 ~~~html
 <head>
@@ -32,25 +32,25 @@ paragraphs: 46
 ~~~
 <%= caption "client/main.html" %>
 
-////
+Este será nosso principal template do aplicativo. Como você pode ver é HTML puro exceto por uma única tag `{{> postsList}}```, a qual é um ponto de inserção para o template postList como logo veremos. Por enquanto, vamos criar mais alguns templates.
 
 ### Meteor Templates
 
-////
+No seu âmago, um site de notícias sociais é composto de postagens organizadas em listas, e é exatamente assim que iremos organizar nossos templates.
 
-////
+Vamos criar um diretório `/views` dentro de `/client`. Isto irá ser onde nós colocaremos nossos templates, e para manter as coisas organizadas nós também criaremos `/posts` dentro de `/views` apenas para nossos templates relacionados com postagens.
 
 <% note do %>
 
 ### Finding Files
 
-////
+O Meteor é incrível para encontrar arquivos. Não importa onde você colocou o seu código no diretório `/client`, o Meteor irá encontrá-lo e compilá-lo corretamente. Isto significa que você nunca precisará manualmente escrever caminhos para inclusão de arquivos JavaScript ou CSS.
 
-////
+Isto também significa que você poderia muito bem colocar todos os seus arquivos no mesmo diretório, ou ainda todo o seu código em um mesmo arquivo. Mas desde que o Meteor vai compilar tudo em um único arquivo minificado de qualquer forma, é melhor que mantemos as coisas bem organizadas e utilize uma estrutura clara de arquivos.
 
 <% end %>
 
-////
+Nós finalmente estamos prontos para nosso segundo template. Dentro de `client/views/posts`, crie `posts_list.html`:
 
 ~~~html
 <template name="postsList">
@@ -63,7 +63,7 @@ paragraphs: 46
 ~~~
 <%= caption "client/views/posts/posts_list.html" %>
 
-////
+E `post_item.html`:
 
 ~~~html
 <template name="postItem">
@@ -76,35 +76,35 @@ paragraphs: 46
 ~~~
 <%= caption "client/views/posts/post_item.html" %>
 
-////
+Note o atributo `name="postList"` do elemento template. Este é o norme que será utilizado pelo Meteor para acompanhar qual template vai aonde.
 
-////
+É hora de introduzir o sistema de templating do Meteor, o [ Handlebars](http://handlebarsjs.com). Handlebars é simplesmente HTML, com a adição de três coisas: parciais (*partials*), expressões (*expressions*) e blocos de ajuda (*block helpers*).
 
-////
+As *parciais* usam a síntaxe `{{> templateName}}`, e simplemente dizem ao Meteor para substituir a parcial com o template de mesmo nome (no nosso caso `postItem`).
 
-////
+*Expressões* tais como `{{title}}` ou chamam a propriedade do objeto atual, ou retornam o valor de um auxiliar do template como definido no gerenciador atual do template (logo mais sobre isso).
 
-////
+Finalmente, *blocos de ajuda*  são tags especiais que controlam o fluxo do template tais como `{{#each}}...{{\each}}` ou `{{#if}}...{{\if}}`.
 
 <% note do %>
 
-### Going Further
+### Indo Além
 
-////
+Você pode visitar o [site oficial de Handlebars](http://handlebarsjs.com) ou [este prático tutorial](http://javascriptissexy.com/handlebars-js-tutorial-learn-everything-about-handlebars-js-javascript-templating/) se quiser aprender mais sobre Handlebars.
 
 <% end %>
 
-////
+Armado com este conhecimento, nós podemos facilmente entender o que está acontecendo aqui.
 
-////
+Primeiro, no template `postsList`, nós estamos iterando sobre um objeto `posts` com o bloco de ajuda `{{#each}}...{{\each}}`. Então, para cada iteração nós incluimos o template `postItem`. 
 
-////
+De onde este objeto `posts` se origina? Boa pergunta. Se trata na verdade de um ajudante do template, e nós iremos defini-lo quando olharmos para os gerenciadores de template.
 
-////
+O template `postItem` em si mesmo é bem direto. Apenas usa três expressões: `{{url}}` e {{title}} ambas retornando as propriedades do documento, e `{{domain}}` que chama um ajudante do template.
 
-////
+Nós mencionamos "ajudantes do template" bastante ao longo deste capítulo sem realmente explicar o que eles fazem. Mas para consertar isso, primeiro precisamos falar sobre gerentes.
 
-### Template Managers
+### Gerentes de Template
 
 ////
 
