@@ -1,3 +1,3 @@
-This is the Portuguese version of [Discover Meteor](http://discovermeteor.com).
+Esta é a versão em português de [Discover Meteor](http://discovermeteor.com).
 
-See it live at http://pt.discovermeteor.com/
+Veja ao vivo em http://pt.discovermeteor.com/
