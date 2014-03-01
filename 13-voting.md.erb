@@ -1,9 +1,9 @@
 ---
-title: Voting
+title: Votação
 slug: voting
 date: 0013/01/01
 number: 13
-contents: Build a system where users can vote on posts.|Rank our posts by vote on a "best" post page.|Learn how to write a general handlebars helper.|Learn a little more about data security in Meteor.|Cover some interesting performance considerations in MongoDB.
+contents: Construa um sistema em que os usuários possam votar nos artigos.|Categorizar nossos artigos por votos em uma página de "melhores" artigos.|Aprenda um pouco mais sobre segurança de dados no Meteor.|Veja considerações interessantes sobre performance no MongoDB.
 paragraphs: 49
 ---
 
@@ -32,10 +32,10 @@ paragraphs: 49
 ////
 
 ~~~js
-// Fixture data 
+// Fixture data
 if (Posts.find().count() === 0) {
   var now = new Date().getTime();
-  
+
   // create two users
   var tomId = Meteor.users.insert({
     profile: { name: 'Tom Coleman' }
@@ -45,7 +45,7 @@ if (Posts.find().count() === 0) {
     profile: { name: 'Sacha Greif' }
   });
   var sacha = Meteor.users.findOne(sachaId);
-  
+
   var telescopeId = Posts.insert({
     title: 'Introducing Telescope',
     userId: sacha._id,
@@ -55,7 +55,7 @@ if (Posts.find().count() === 0) {
     commentsCount: 2,
     upvoters: [], votes: 0
   });
-  
+
   Comments.insert({
     postId: telescopeId,
     userId: tom._id,
@@ -63,7 +63,7 @@ if (Posts.find().count() === 0) {
     submitted: now - 5 * 3600 * 1000,
     body: 'Interesting project Sacha, can I get involved?'
   });
-  
+
   Comments.insert({
     postId: telescopeId,
     userId: sacha._id,
@@ -71,7 +71,7 @@ if (Posts.find().count() === 0) {
     submitted: now - 3 * 3600 * 1000,
     body: 'You sure can Tom!'
   });
-  
+
   Posts.insert({
     title: 'Meteor',
     userId: tom._id,
@@ -81,7 +81,7 @@ if (Posts.find().count() === 0) {
     commentsCount: 0,
     upvoters: [], votes: 0
   });
-  
+
   Posts.insert({
     title: 'The Meteor Book',
     userId: tom._id,
@@ -91,7 +91,7 @@ if (Posts.find().count() === 0) {
     commentsCount: 0,
     upvoters: [], votes: 0
   });
-  
+
   for (var i = 0; i < 10; i++) {
     Posts.insert({
       title: 'Test post #' + i,
@@ -115,18 +115,18 @@ if (Posts.find().count() === 0) {
 
 // check that there are no previous posts with the same link
 if (postAttributes.url && postWithSameLink) {
-  throw new Meteor.Error(302, 
-    'This link has already been posted', 
+  throw new Meteor.Error(302,
+    'This link has already been posted',
     postWithSameLink._id);
 }
 
 // pick out the whitelisted keys
 var post = _.extend(_.pick(postAttributes, 'url', 'title', 'message'), {
-  userId: user._id, 
-  author: user.username, 
+  userId: user._id,
+  author: user.username,
   submitted: new Date().getTime(),
   commentsCount: 0,
-  upvoters: [], 
+  upvoters: [],
   votes: 0
 });
 
@@ -187,20 +187,20 @@ Meteor.methods({
   post: function(postAttributes) {
     //...
   },
-  
+
   upvote: function(postId) {
     var user = Meteor.user();
     // ensure the user is logged in
     if (!user)
       throw new Meteor.Error(401, "You need to login to upvote");
-    
+
     var post = Posts.findOne(postId);
     if (!post)
       throw new Meteor.Error(422, 'Post not found');
-    
+
     if (_.include(post.upvoters, user._id))
       throw new Meteor.Error(422, 'Already upvoted this post');
-    
+
     Posts.update(post._id, {
       $addToSet: {upvoters: user._id},
       $inc: {votes: 1}
@@ -321,15 +321,15 @@ Meteor.methods({
   post: function(postAttributes) {
     //...
   },
-  
+
   upvote: function(postId) {
     var user = Meteor.user();
     // ensure the user is logged in
     if (!user)
       throw new Meteor.Error(401, "You need to login to upvote");
-    
+
     Posts.update({
-      _id: postId, 
+      _id: postId,
       upvoters: {$ne: user._id}
     }, {
       $addToSet: {upvoters: user._id},
@@ -383,9 +383,9 @@ Meteor.methods({
 ~~~js
 PostsListController = RouteController.extend({
   template: 'postsList',
-  increment: 5, 
-  limit: function() { 
-    return parseInt(this.params.postsLimit) || this.increment; 
+  increment: 5,
+  limit: function() {
+    return parseInt(this.params.postsLimit) || this.increment;
   },
   findOptions: function() {
     return {sort: this.sort, limit: this.limit()};
@@ -424,12 +424,12 @@ Router.map(function() {
     path: '/',
     controller: NewPostsListController
   });
-  
+
   this.route('newPosts', {
     path: '/new/:postsLimit?',
     controller: NewPostsListController
   });
-  
+
   this.route('bestPosts', {
     path: '/best/:postsLimit?',
     controller: BestPostsListController
@@ -539,11 +539,11 @@ Template.header.helpers({
   activeRouteClass: function(/* route names */) {
     var args = Array.prototype.slice.call(arguments, 0);
     args.pop();
-    
+
     var active = _.any(args, function(name) {
       return Router.current().route.name === name
     });
-    
+
     return active && 'active';
   }
 });

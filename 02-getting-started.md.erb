@@ -1,9 +1,9 @@
 ---
-title: Getting Started
+title: Começando com Meteor
 slug: getting-started
 date: 0002/01/01
 number: 2
-contents: Install Meteor & Meteorite.|Learn about the 5 types of Meteor packages.|Setup the file structure of your Meteor app.
+contents: Instalação Meteor & Meteorite.|Aprenda sobre 5 tipos de pacotes Meteor.| Organização da estrutura de arquivos de sua aplicação Meteor.
 paragraphs: 49
 ---
 
@@ -28,7 +28,7 @@ Nitrous.io é um serviço que permite a você rodar aplicativos e editar o códi
 Você pode simplesmente seguir o guia até (e incluindo) o segmento "Instalando Meteor & Meteorite", e então seguir junto com o livro novamente começando do segmento "Criando um Simples Aplicativo" deste capítulo.
 
 <% end %>
- 
+
 ### Meteorite
 
 Devido ao fato que Meteor não suporta pacotes de terceiros diretamente, Tom Coleman (um dos autores do livro) e alguns membros da comunidade criaram [Meteorite](http://oortcloud.github.com/meteorite/), um invólucro para Meteor. Meteorite também toma conta da instalação de Meteor para você e juntando a ele qualquer pacote que você encontrar.
@@ -38,7 +38,7 @@ Já que nós necessitaremos de pacotes de terceiros para algumas das funcionalid
 ### Instalando Meteorite
 
 Você precisará se assegurar que node e git estejam instalados na sua máquina. Instale-os da forma padrão para o seu Sistema Operacional, ou tente os links a seguir:
- 
+
 - [Node download site](http://nodejs.org/download/)
 - [Git download site](http://git-scm.com/downloads)
 
@@ -71,7 +71,7 @@ Nota: ainda não há suporte Windows para Meteorite, mas você pode dar uma olha
   ### `mrt` vs `meteor`
 
   Meteorite instala o executável `mrt`, o qual nós usaremos para instalar pacotes no nosso aplicativo. Quando nós quisermos ativar nosso servidor, entretanto, nós usaremos o executável `meteor`.
-  
+
 <% end %>
 
 ### Criando um Simples Aplicativo
@@ -85,10 +85,10 @@ $ mrt create microscope
 Este comando carregará o Meteor, e estabelecerá um projeto Meteor básico e pronto para você usar. Após isto, você poderá ver um diretório, `microscope/`, contendo o seguinte:
 
 ~~~bash
-microscope.css  
-microscope.html 
-microscope.js   
-smart.json 
+microscope.css
+microscope.html
+microscope.js
+smart.json
 ~~~
 
 O aplicativo que o Meteor criou para você é um simples aplicativo clichê demonstrando alguns padrões simples.
@@ -171,7 +171,7 @@ Aliás, você pode também ter notado um diretório `.meteor` escondido. Aqui é
 
 ### Underscores vs CamelCase
 
-A única coisa que nós iremos dizer sobre o antigo debate underscore (`my_variable`) vs camelCase (`myVariable`) é que realmente não importa qual você escolha desde que você permaneça nele. 
+A única coisa que nós iremos dizer sobre o antigo debate underscore (`my_variable`) vs camelCase (`myVariable`) é que realmente não importa qual você escolha desde que você permaneça nele.
 
 Neste livro, nós usaremos camelCase porque é a forma JavaScript comum de ser fazer as coisas (até mesmo por que é JavaScript e não java_script!).
 
@@ -287,7 +287,7 @@ body {
 
 <% note do %>
 
-### Uma nota sobre CoffeeScript 
+### Uma nota sobre CoffeeScript
 
 Neste livro nós iremos escrever em puro JavaScript. Mas se você preferir CoffeeScript, Meteor te dá cobertura. Apenas adicione o pacote CoffeeScript e está pronto para seguir:
 

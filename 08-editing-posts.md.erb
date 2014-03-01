@@ -1,9 +1,9 @@
 ---
-title: Editing Posts
+title: Editando Artigos
 slug: editing-posts
 date: 0008/01/01
 number: 8
-contents: Add a form for editing your posts.|Set up edit permissions.|Restrict which properties can be edited.
+contents: Adicione um formulário par editar seus artigos.|Criar edição de permissões.| Restringir quais propriedades podem ser editadas.
 paragraphs: 29
 ---
 
@@ -40,7 +40,7 @@ var requireLogin = function() {
       this.render('loading')
     else
       this.render('accessDenied');
-  
+
     this.stop();
   }
 }
@@ -93,14 +93,14 @@ Router.before(requireLogin, {only: 'postSubmit'});
 Template.postEdit.events({
   'submit form': function(e) {
     e.preventDefault();
-    
+
     var currentPostId = this._id;
-    
+
     var postProperties = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val()
     }
-    
+
     Posts.update(currentPostId, {$set: postProperties}, function(error) {
       if (error) {
         // display the error to the user
@@ -110,10 +110,10 @@ Template.postEdit.events({
       }
     });
   },
-  
+
   'click .delete': function(e) {
     e.preventDefault();
-    
+
     if (confirm("Delete this post?")) {
       var currentPostId = this._id;
       Posts.remove(currentPostId);
