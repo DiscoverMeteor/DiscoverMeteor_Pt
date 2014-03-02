@@ -4,43 +4,43 @@ slug: meteor-vocabulary
 date: 0014/01/02
 number: 14.5
 sidebar: true
-contents: Rever alguns termos communs de Meteor.
+contents: Rever alguns termos comuns de Meteor.
 paragraphs: 24
 ---
 
-Neste livro você irá ouvir algumas palavras que poder ser novas, ou pelo menos usadas de uma forma nova no contexto de Meteor. Vamos usar este capítulo para as definir.
+Neste livro você irá ouvir algumas palavras que podem ser novas, ou pelo menos usadas de uma forma nova no contexto de Meteor. Vamos usar este capítulo para as definir.
 
 #### Cliente
 
-Quando nós falamos do Cliente, nós estamo-nos a referir a código a correr no *navegador web* dos utilizadores, seja isso um navegador tradicional como o Firefox ou o Safari, ou algo tão complexo como a UIWebView numa aplicação de iPhone nativa.
+Quando falamos do Cliente, estamos a referir código a correr no *navegador web* dos utilizadores, seja isso um navegador tradicional como o Firefox ou o Safari, ou algo tão complexo como uma UIWebView numa aplicação de iPhone nativa.
 
 #### Coleção
 
-Uma Coleção Meteor é a entidade gestora de dados que automáticamente sincroniza entre cliente e servidor. As Coleções têm um nome (como por exemplo `posts`), e normalmente existem tanto no cliente como no servidor. Apesar de se terem comportamentos diferentes, elas têm uma API comum baseada na de Mongo.
+Uma Coleção Meteor é a entidade gestora de dados que automaticamente sincroniza entre cliente e servidor. As Coleções têm um nome (como por exemplo `posts`), e normalmente existem tanto no cliente como no servidor. Apesar de se terem comportamentos diferentes, elas têm uma API comum baseada na de Mongo.
 
 #### Computação
 
-Uma computação é um bloco de código que corre cada vez que uma fonte de dados reactiva de que ela depende muda. Se tiver uma fonte de dados reactiva (por exemplo, uma variável de Sessão) e quiser responder-lhe reactivamente, vai ser necessário estabelecer uma computação para ela.
+Uma computação é um bloco de código que corre cada vez que uma fonte de dados reativa de que ela depende muda. Se tiver uma fonte de dados reativa (por exemplo, uma variável de Sessão) e quiser responder-lhe reativamente, vai ser necessário estabelecer uma computação para ela.
 
 #### Cursor
 
-Um cursor é o resultado de correr uma pesquisa numa coleção de Mongo. No cliente, um cursor não é simplesmente uma lista de resultados, mas um objecto *reactivo* que pode ser observado enquanto objectos na coleção relevante são adicionados, removidos ou atualizados.
+Um cursor é o resultado de correr uma pesquisa numa coleção de Mongo. No cliente, um cursor não é simplesmente uma lista de resultados, mas um objecto *reactivo* que pode ser observado enquanto objetos na coleção relevante são adicionados, removidos ou atualizados.
  
 #### DDP
 
-DDP é o Protocolo de Dados Distribuidos (Distributed Data Protocol) de Meteor, o protocolo de baixo nível utilizado para sincronizar coleções e fazer chamadas a Métodos. O DDP foi desenhado com a intenção de ser um protocolo genérico, que substitui o HTTP para aplicações de tempo real com grandes quantidades de dados.
+DDP é o Protocolo de Dados Distribuídos (Distributed Data Protocol) de Meteor, o protocolo de baixo nível utilizado para sincronizar coleções e fazer chamadas a Métodos. O DDP foi desenhado com a intenção de ser um protocolo genérico, que substitui o HTTP para aplicações de tempo real com grandes quantidades de dados.
 
 #### Deps
 
-Deps é o sistema de reactividade do Meteor. Deps é usado internamente para manter o HTML sincronizado com o modelo de dados subjacente.
+Deps é o sistema de reatividade do Meteor. Deps é usado internamente para manter o HTML sincronizado com o modelo de dados subjacente.
 
 #### Documento
 
-O Mongo é uma fonte de dados baseada em documentos, nesse sentido os objectos que saêm das coleções são chamados "documentos". Estes são objectos JavaScript simples (que não podem, no entanto, conter funções) com uma única properiedade especial, o `_id`, que é utilizado pelo Meteor para gerir as suas propriedades através do DDP.
+O Mongo é uma fonte de dados baseada em documentos, nesse sentido os objetos que saem das coleções são chamados "documentos". Estes são objetos JavaScript simples (que não podem, no entanto, conter funções) com uma única propriedade especial, o `_id`, que é utilizado pelo Meteor para gerir as suas propriedades através do DDP.
 
 #### Ajudante
 
-Quando um template precisa de renderizar algo mais complexo que uma propriedade de um documento ele pode chamdar um ajudante, uma função que é utilizada para ajudar no processo de renderizar.
+Quando um template precisa de renderizar algo mais complexo que uma propriedade de um documento ele pode chamar um ajudante, uma função que é utilizada para ajudar no processo de renderizar.
 
 #### Compensação de Latência
 
@@ -57,24 +57,24 @@ A coleção no lado do cliente é uma base de dados em memória que disponibiliz
 #### Pacote
 
 Um pacote Meteor pode consistir de
-  - 1. Código JavaScript para correr no servidor.
-  - 2. Código JavaScript para correr no cliente.
-  - 3. Instruções sobre como processar resursos (como SASS para CSS).
-  - 4. Recursos para serem processados.
+  1. Código JavaScript para correr no servidor.
+  2. Código JavaScript para correr no cliente.
+  3. Instruções sobre como processar recursos (como SASS para CSS).
+  4. Recursos para serem processados.
 
 Um pacote é como uma biblioteca com super-poderes. O Meteor vem com um conjunto grande de pacotes base. Existe ainda o projecto [Atmosphere](http://atmosphere.meteor.com), que é uma coleção de pacotes de terceiros criado pela comunidade.
 
 #### Publicação
 
-Uma publicação é um conjunto de dados com um nome e que é customizado por cada utiliador que o subscreve. As publicações são definidas no servidor.
+Uma publicação é um conjunto de dados com um nome e que é customizado por cada utilizador que o subscreve. As publicações são definidas no servidor.
 
 #### Servidor
 
-O servidor Meteor é um servidor HTTP e DDP que corre em node.js. Consiste de todas as bibliotecas de Meteor e do seu código JavaScript de servidor. Quando você inicia um servidor Meteor, este liga-se a uma base de dados Mongo (que também é iniciado automáticamente quando em desenvolvimento).
+O servidor Meteor é um servidor HTTP e DDP que corre em node.js. Consiste de todas as bibliotecas de Meteor e do seu código JavaScript de servidor. Quando você inicia um servidor Meteor, este liga-se a uma base de dados Mongo (que também é iniciado automaticamente quando em desenvolvimento).
 
 #### Sessão
 
-A Sessão em Meteor é uma fonte de dados reactiva no cliente que é usada pela sua aplicação para manter o estado em que o utilizador está.
+A Sessão em Meteor é uma fonte de dados reativa no cliente que é usada pela sua aplicação para manter o estado em que o utilizador está.
 
 #### Subscrição
 
