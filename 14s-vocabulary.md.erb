@@ -8,7 +8,7 @@ contents: Rever alguns termos communs de Meteor.
 paragraphs: 24
 ---
 
-Neste livro você irá ouvir algumas palavras que poder ser novas, ou pelo menos usadas de uma forma novo no contexto de Meteor. Vamos usar este capítulo para as definir.
+Neste livro você irá ouvir algumas palavras que poder ser novas, ou pelo menos usadas de uma forma nova no contexto de Meteor. Vamos usar este capítulo para as definir.
 
 #### Cliente
 
@@ -20,7 +20,7 @@ Uma Coleção Meteor é a entidade gestora de dados que automáticamente sincron
 
 #### Computação
 
-Uma computação é um bloco de código que corre cada vez que uma fonte de dados reactiva do que ela depende muda. Se tiver uma fonte de dados reactiva (por exemplo, uma variável de Sessão) e quiser responder-lhe reactivamente, vai ser necessário estabelecer uma computação para ela.
+Uma computação é um bloco de código que corre cada vez que uma fonte de dados reactiva de que ela depende muda. Se tiver uma fonte de dados reactiva (por exemplo, uma variável de Sessão) e quiser responder-lhe reactivamente, vai ser necessário estabelecer uma computação para ela.
 
 #### Cursor
 
@@ -28,7 +28,7 @@ Um cursor é o resultado de correr uma pesquisa numa coleção de Mongo. No clie
  
 #### DDP
 
-DDP é o Protocolo de Dados Distribuidos (Distributed Data Protocol) de Meteor, o protocolo de baixo nível utilizado para sincronizar coleções e fazer chamadas a Métodos. O DDP foi desenhado com intenção de ser um protocolo genérico, que substitui o HTTP para aplicação de tempo real com grandes quantidades de dados.
+DDP é o Protocolo de Dados Distribuidos (Distributed Data Protocol) de Meteor, o protocolo de baixo nível utilizado para sincronizar coleções e fazer chamadas a Métodos. O DDP foi desenhado com a intenção de ser um protocolo genérico, que substitui o HTTP para aplicações de tempo real com grandes quantidades de dados.
 
 #### Deps
 
@@ -44,37 +44,37 @@ Quando um template precisa de renderizar algo mais complexo que uma propriedade 
 
 #### Compensação de Latência
 
-É uma técnica utilizada para permitir simular chamadas a Métodos no cliente, para evitar demoras enquando se espera que o servidor responda.
+É uma técnica utilizada para permitir simular chamadas a Métodos no cliente, para evitar demoras enquanto se espera que o servidor responda.
 
 #### Método
 
-Um Método de Meteor é uma chamada a uma função remota do cliente para o servidor, com alguma lógica especial para seguir alterações nas coleções e permitir Compensação de Latência.
+Um Método de Meteor é uma chamada a uma função remota do cliente para o servidor, com alguma lógica especial para gerir alterações nas coleções e suportar Compensação de Latência.
 
 #### MiniMongo
 
-A coleção no lado do cliente é uma fonte dados em memória que disponibiliza uma API semelhante à de Mongo. A biblioteca que suporta este comportamento é chamada "MiniMongo", para indicar que é uma versão mais pequeno do Mongo que corre completamente em memória.
+A coleção no lado do cliente é uma base de dados em memória que disponibiliza uma API semelhante à de Mongo. A biblioteca que suporta este comportamento é chamada "MiniMongo", para indicar que é uma versão mais pequena do Mongo que corre completamente em memória.
 
 #### Pacote
 
 Um pacote Meteor pode consistir de
-  1. Código JavaScript para correr no servidor.
-  2. Código JavaScript para correr no cliente.
-  3. Instruções sobre como processar resurrsos (como SASS para CSS).
-  4. Recursos para serem processados.
+  - 1. Código JavaScript para correr no servidor.
+  - 2. Código JavaScript para correr no cliente.
+  - 3. Instruções sobre como processar resursos (como SASS para CSS).
+  - 4. Recursos para serem processados.
 
-Um pacote é como um biblioteca com super-poderes. O Meteor vem com um conjunto grande de pacotes base. Existe ainda o projecto [Atmosphere](http://atmosphere.meteor.com), que é uma coleção de pacotes de terceiros criada pela comunidade.
+Um pacote é como uma biblioteca com super-poderes. O Meteor vem com um conjunto grande de pacotes base. Existe ainda o projecto [Atmosphere](http://atmosphere.meteor.com), que é uma coleção de pacotes de terceiros criado pela comunidade.
 
 #### Publicação
 
-Uma publicação é um conjunto de dados com um nome que é customizado por cada utiliador que o subscreve. As publicações são definidas no servidor.
+Uma publicação é um conjunto de dados com um nome e que é customizado por cada utiliador que o subscreve. As publicações são definidas no servidor.
 
 #### Servidor
 
-O servidor Meteor é um servidor HTTP e DDP que corre em node.js. Consiste de todas as bibliotecas de Meteor e do seu código JavaScript de servidor. Quando você inicia um servidor Meteor, este liga-se a uma base de dados Mongo (que este também inicia quando em desenvolvimento).
+O servidor Meteor é um servidor HTTP e DDP que corre em node.js. Consiste de todas as bibliotecas de Meteor e do seu código JavaScript de servidor. Quando você inicia um servidor Meteor, este liga-se a uma base de dados Mongo (que também é iniciado automáticamente quando em desenvolvimento).
 
 #### Sessão
 
-A Sessão em Meteor é uma fonte de dados reactive no cliente que é usada pela sua aplicação para manter o estado em que o utilizador está.
+A Sessão em Meteor é uma fonte de dados reactiva no cliente que é usada pela sua aplicação para manter o estado em que o utilizador está.
 
 #### Subscrição
 
