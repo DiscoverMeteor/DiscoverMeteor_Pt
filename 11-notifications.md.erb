@@ -1,9 +1,9 @@
 ---
-title: Notifications
+title: Notificações
 slug: notifications
 date: 0011/01/01
 number: 11
-contents: Add a notifications collection to notify users of other user's actions.|Learn how to only share the relevant notifications with a given user.|Learn more about Meteor publications and subscriptions.
+contents: Adicione uma coleção de notificações para notificar usuários sobre ações de outros usuários.| Aprenda como apresentar apenas notificações relevantes para um determinado usuário.|Aprenda mais sobre publicações e subscrições no Meteor.
 paragraphs: 25
 ---
 
@@ -57,10 +57,10 @@ Meteor.methods({
 
     // create the comment, save the id
     comment._id = Comments.insert(comment);
-    
+
     // now create a notification, informing the user that there's been a comment
     createCommentNotification(comment);
-    
+
     return comment._id;
   }
 });
@@ -83,7 +83,7 @@ Meteor.publish('notifications', function() {
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
-  waitOn: function() { 
+  waitOn: function() {
     return [Meteor.subscribe('posts'), Meteor.subscribe('notifications')]
   }
 });

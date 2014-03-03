@@ -1,9 +1,9 @@
 ---
-title: Creating Posts
+title: Criando Artigos
 slug: creating-posts
 date: 0007/01/01
 number: 7
-contents: Learn how to submit a post client-side.|Implement a simple security check.|Restrict access to the post submit form.|Learn to use a server-side Method for added security.
+contents: Aprenda como enviar um artigo no lado do cliente.|Implemente uma simples checagem de segurança.|Restrinja acesso ao formulário de envio de artigos.|Aprenda como usar Method do lado do servidor para adicionar segurança.
 paragraphs: 60
 ---
 
@@ -24,12 +24,12 @@ Router.configure({
 
 Router.map(function() {
   this.route('postsList', {path: '/'});
-  
+
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-  
+
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -93,7 +93,7 @@ Router.map(function() {
         <div class="controls">
             <textarea name="message" type="text" value=""/>
         </div>
-    </div> 
+    </div>
 
     <div class="control-group">
         <div class="controls">
@@ -120,13 +120,13 @@ Router.map(function() {
 Template.postSubmit.events({
   'submit form': function(e) {
     e.preventDefault();
-    
+
     var post = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val(),
       message: $(e.target).find('[name=message]').val()
     }
-    
+
     post._id = Posts.insert(post);
     Router.go('postPage', post);
   }
@@ -207,12 +207,12 @@ Router.configure({
 
 Router.map(function() {
   this.route('postsList', {path: '/'});
-  
+
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-  
+
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -258,12 +258,12 @@ Router.before(requireLogin, {only: 'postSubmit'});
 ~~~js
 Router.map(function() {
   this.route('postsList', {path: '/'});
-  
+
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-  
+
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -275,7 +275,7 @@ var requireLogin = function() {
       this.render(this.loadingTemplate);
     else
       this.render('accessDenied');
-    
+
     this.stop();
   }
 }
@@ -326,17 +326,17 @@ Router.before(requireLogin, {only: 'postSubmit'});
 Template.postSubmit.events({
   'submit form': function(e) {
     e.preventDefault();
-    
+
     var post = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val(),
       message: $(e.target).find('[name=message]').val()
     }
-    
+
     Meteor.call('post', post, function(error, id) {
       if (error)
         return alert(error.reason);
-        
+
       Router.go('postPage', {_id: id});
     });
   }
@@ -355,31 +355,31 @@ Meteor.methods({
   post: function(postAttributes) {
     var user = Meteor.user(),
       postWithSameLink = Posts.findOne({url: postAttributes.url});
-    
+
     // ensure the user is logged in
     if (!user)
       throw new Meteor.Error(401, "You need to login to post new stories");
-    
+
     // ensure the post has a title
     if (!postAttributes.title)
       throw new Meteor.Error(422, 'Please fill in a headline');
-    
+
     // check that there are no previous posts with the same link
     if (postAttributes.url && postWithSameLink) {
-      throw new Meteor.Error(302, 
-        'This link has already been posted', 
+      throw new Meteor.Error(302,
+        'This link has already been posted',
         postWithSameLink._id);
     }
-    
+
     // pick out the whitelisted keys
     var post = _.extend(_.pick(postAttributes, 'url', 'title', 'message'), {
-      userId: user._id, 
-      author: user.username, 
+      userId: user._id,
+      author: user.username,
       submitted: new Date().getTime()
     });
-    
+
     var postId = Posts.insert(post);
-    
+
     return postId;
   }
 });

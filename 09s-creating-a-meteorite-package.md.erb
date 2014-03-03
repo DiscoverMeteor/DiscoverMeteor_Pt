@@ -1,10 +1,10 @@
 ---
-title: Creating a Meteorite Package
+title: Criando um Pacote Meteorite
 slug: creating-a-meteorite-package
 date: 0009/01/02
 number: 9.5
 sidebar: true
-contents: Write a local in-app package.|Write some tests for your package.|Release your package on Atmosphere.
+contents: Escreva um pacote local para sua aplicação.|Escreva alguns testes para seu pacote.|Disponibilize seua pacote no Atmosphere.
 paragraphs: 22
 ---
 
@@ -23,8 +23,8 @@ Package.on_use(function (api, where) {
   api.use(['minimongo', 'mongo-livedata', 'templating'], 'client');
 
   api.add_files(['errors.js', 'errors_list.html', 'errors_list.js'], 'client');
-  
-  if (api.export) 
+
+  if (api.export)
     api.export('Errors');
 });
 ~~~
@@ -36,7 +36,7 @@ Package.on_use(function (api, where) {
 Errors = {
   // Local (client-only) collection
   collection: new Meteor.Collection(null),
-  
+
   throw: function(message) {
     Errors.collection.insert({message: message, seen: false})
   },
@@ -134,28 +134,28 @@ Posts.update(currentPostId, {$set: postProperties}, function(error) {
 ~~~js
 Tinytest.add("Errors collection works", function(test) {
   test.equal(Errors.collection.find({}).count(), 0);
-  
+
   Errors.throw('A new error!');
   test.equal(Errors.collection.find({}).count(), 1);
-  
+
   Errors.collection.remove({});
 });
 
-Tinytest.addAsync("Errors template works", function(test, done) {  
+Tinytest.addAsync("Errors template works", function(test, done) {
   Errors.throw('A new error!');
   test.equal(Errors.collection.find({seen: false}).count(), 1);
-  
+
   // render the template
   OnscreenDiv(Spark.render(function() {
     return Template.meteorErrors();
   }));
-  
+
   // wait a few milliseconds
   Meteor.setTimeout(function() {
     test.equal(Errors.collection.find({seen: false}).count(), 0);
     test.equal(Errors.collection.find({}).count(), 1);
     Errors.clearSeen();
-    
+
     test.equal(Errors.collection.find({seen: true}).count(), 0);
     done();
   }, 500);
@@ -172,8 +172,8 @@ Tinytest.addAsync("Errors template works", function(test, done) {
 ~~~js
 Package.on_test(function(api) {
   api.use('errors', 'client');
-  api.use(['tinytest', 'test-helpers'], 'client');  
-  
+  api.use(['tinytest', 'test-helpers'], 'client');
+
   api.add_files('errors_tests.js', 'client');
 });
 ~~~

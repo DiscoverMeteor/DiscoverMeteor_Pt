@@ -1,9 +1,9 @@
 ---
-title: Routing
+title: Rotas
 slug: routing
 date: 0005/01/01
 number: 5
-contents: Learn about routing in Meteor.|Create post discussion pages, with unique URLs.|Learn how to link to those URLs properly.
+contents: Aprenda sobre rotas no Meteor.|Crie uma página de artigos de discussão, com URLs únicas.|Aprenda como linkar propriamente essas URLs.
 paragraphs: 72
 ---
 
@@ -218,7 +218,7 @@ Router.map(function() {
 ~~~js
 Router.map(function() {
   this.route('postsList', {path: '/'});
-  
+
   this.route('postPage', {
     path: '/posts/:_id'
   });
@@ -243,7 +243,7 @@ Router.map(function() {
 ~~~js
 Router.map(function() {
   this.route('postsList', {path: '/'});
-  
+
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }

@@ -1,10 +1,10 @@
 ---
-title: Publications and Subscriptions
+title: Publicações e Subscrições
 slug: publications-and-subscriptions
 date: 0004/01/02
 number: 4.5
 sidebar: true
-contents: Understand how publications and subscriptions work.|Learn what the default Autopublish package does.|See a few more examples of publication patterns.
+contents: Aprenda como publicações e subscrições funcionam.|Aprenda o que o pacote padrão Autopublish faz.|Veja mais alguns exemplos de padrões de publicações.
 paragraphs: 52
 ---
 
@@ -59,7 +59,7 @@ paragraphs: 52
 ~~~js
 // on the server
 Meteor.publish('posts', function() {
-  return Posts.find({flagged: false}); 
+  return Posts.find({flagged: false});
 });
 ~~~
 
@@ -140,7 +140,7 @@ Template.posts.helpers({
 
 ////
 
-~~~js 
+~~~js
 Meteor.publish('allPosts', function(){
   return Posts.find();
 });
@@ -154,7 +154,7 @@ Meteor.publish('allPosts', function(){
 
 ////
 
-~~~js 
+~~~js
 Meteor.publish('somePosts', function(){
   return Posts.find({'author':'Tom'});
 });

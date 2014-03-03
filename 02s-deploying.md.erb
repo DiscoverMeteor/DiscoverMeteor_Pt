@@ -4,7 +4,7 @@ slug: deploying
 date: 0002/01/02
 number: 2.5
 sidebar: true
-contents: Learn how to deploy on Meteor.com.|Learn how to deploy on Modulus.|Learn how to deploy on your own server using Meteor Up.
+contents: Aprenda como implementar sua aplicação no Meteor.com.|Aprenda como implementar no Modulus.|Aprenda como implementar em seu próprio servidor usando Meteor Up.
 paragraphs: 46
 ---
 
@@ -32,7 +32,7 @@ Implementando em Meteor é bem simples. Apenas abra seu terminal, vá ao diretó
 
 ~~~bash
 $ meteor deploy myapp.meteor.com
-~~~ 
+~~~
 
 Claro, você que terá que substituir "meuaplicativo" pelo nome do seu aplicativo de escolha, preferidamente um que ainda não esteja em uso. Se o nome escolhido já estiver em uso, Meteor pedirá a você uma senha. Se isso ocorrer, simplesmente cancele a operação com `ctrl+c` e tente novamente com um nome diferente.
 
@@ -114,7 +114,7 @@ Para começar, nós precisaremos instalar Meteor Up via `npm` como a seguir:
 $ npm install -g mup
 ~~~
 
-Nós então criaremos um diretório especial, separado que terá as configurações do nosso Meteor Up para uma implementação em particular. Nós estamos usando um diretório separado por duas razões: primeiro, é melhor evitar incluir credenciais privadas no seu repósitorio Git, especialmente se você está trabalhando num banco de códigos público. 
+Nós então criaremos um diretório especial, separado que terá as configurações do nosso Meteor Up para uma implementação em particular. Nós estamos usando um diretório separado por duas razões: primeiro, é melhor evitar incluir credenciais privadas no seu repósitorio Git, especialmente se você está trabalhando num banco de códigos público.
 
 Segundo, usando múltiplos diretórios separados, nós seremos capazes de administrar múltiplas configurações Meteor Up em paralelo. Isso será útil para implementação para instâncias de produção e teste, por exemplo.
 
