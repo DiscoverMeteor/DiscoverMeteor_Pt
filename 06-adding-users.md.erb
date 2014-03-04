@@ -7,19 +7,19 @@ contents: Aprenda sobre contas de usúarios no Meteor.|Adicione toda autenticaç
 paragraphs: 27
 ---
 
-////
+Até então, nós conseguimos criar e mostrar algumas informações demonstrativas e estáticas de forma sensata e conectar tudo num simples protótipo.
 
-////
+Nós até vimos que a nossa UI é responsiva a mudanças nas informações, e informação inserida ou modificada aparece imediatamente. Porém, nosso site está paralisado pelo fato de que nós não podemos enviar informação. Na real, nós ainda nem temos usuários!
 
-////
+Vamos ver como nós podemos consertar isso.
 
-### Accounts: users made simple
+### Contas: usuários de forma simples
 
-////
+Na maioria dos web frameworks, adicionar contas de usuário é uma questão familiar. Claro, você tem quer fazê-lo quase em cada projeto, mas não é tão fácil quanto poderia ser. Pior ainda, assim que você tem que lidar com OAuth e outros esquemas de autenticações de terceiros, as coisas tendem a ficar feias rápido. 
 
-////
+Por sorte, Meteor te dá cobertura. Graças ao modo como os pacotes do Meteor podem contribuir com código tanto no servidor (JavaScript) quanto no cliente (JavaScript, HTML, e CSS), nós podemos ter um sistema de contas quase por nada.
 
-////
+Nós poderíamos apenas usar a UI nativa do Meteor para contas (com `mrt add accounts-ui`) mas já que nós construímos todo nosso app com Bootstrap, nós iremos usar o pacote `accounts-ui-bootstrap-dropdown` no lugar (não se preocupe, a única diferença é na estilização). Na linha de comando, nós digitamos:
 
 ~~~bash
 $ mrt add accounts-ui-bootstrap-dropdown
@@ -27,9 +27,9 @@ $ mrt add accounts-password
 ~~~
 <%= caption "Terminal" %>
 
-////
+Esses dois comandos fazem os templates especiais de conta disponíveis para nós; nós podemos incluí-los no nosso site usando o ajudante `{{loginButtons}}`. Uma dica útil: você pode controlar em que lado o seu log-in dropdown aparece usando o atributo `align` (por exemplo: `{{loginButtons align="right"}}`).
 
-////
+Nós adicionaremos esses botões ao nosso cabeçalho (header). E já que esse cabeçalho está começando a ficar grande, vamos dar mais espaço a ele com um template próprio (nós o incluíremos em `client/views/includes`). Nós também usaremos alguma marcação extra e classes do Bootstrap para garantir que tudo pareça ótimo: 
 
 ~~~html
 <template name="layout">
@@ -65,13 +65,13 @@ $ mrt add accounts-password
 ~~~
 <%= caption "client/views/includes/header.html" %>
 
-////
+Agora, quando nós navegamos para o nosso aplicativo, nós vemos os botões de login das contas no canto direito do nosso site.
 
 <%= screenshot "6-1", "Meteor's built-in accounts UI" %>
 
-////
+Nós podemos usá-los para cadastrar, logar, requerir mudança de senha, e todo resto que um site simples precisa para contas baseadas em senha.
 
-////
+Para informar ao nosso sistema de contas que nós queremos que os usuários façam log-in via um username, nós simplesmente adicionamos um bloco de configuração `Accounts.ui` num novo arquivo `config.js` dentro de `client/helpers`:
 
 ~~~js
 Accounts.ui.config({
@@ -82,20 +82,20 @@ Accounts.ui.config({
 
 <%= commit "6-1", "Added accounts and added template to the header" %>
 
-### Creating Our First User
+### Criando Nosso Primeiro Usuário
 
-////
+Vá em frente e cadastre-se com uma conta: o botão "Sign in" mudará para mostrar o seu username. Isto confirma que uma conta de usuário foi criada para você. Mas de onde a informação de conta de usário está vindo?
 
-////
+Ao adicionar o pacote `contas`, o Meteor criou uma nova coleção especial, a qual pode ser acessada com `Meteor.users`. Para vê-la, abra o console do seu navegador e digite:
 
 ~~~js
 ❯ Meteor.users.findOne();
 ~~~
 <%= caption "Browser console" %>
 
-////
+O console deverá retornar um objeto representando o seu objeto usuário; se você der uma olhada, você pode ver que seu username está lá, assim como uma `_id` que unicamente identifica você. Note que você também pode chamar o atual usuário logado com `Meteor.user()`.
 
-////
+Agora log out e cadastre-se com um novo username. `Meteor.user()` deve retornar agora um segundo usuário. Mas espere, vamos rodar:
 
 ~~~js
 ❯ Meteor.users.find().count();
@@ -103,9 +103,9 @@ Accounts.ui.config({
 ~~~
 <%= caption "Browser console" %>
 
-////
+O console retorna 1. Espere, não deveria ser 2? O primeiro usuário foi deletado? Se você tentar logar com o primeiro usuário de novo, você verá que este não é o caso.
 
-////
+Vamos ter certeza e checar o armazenamento de informação canônico, o banco de dados Mongo. Nós logaremos no Mongo (`meteor mongo` no seu terminal) e checaremos:
 
 ~~~bash
 > db.users.count()
@@ -113,50 +113,50 @@ Accounts.ui.config({
 ~~~
 <%= caption "Mongo console" %>
 
-////
+Há definitivamente dois usuários. Então por que nós conseguimos ver apenas um por vez no navegador?
 
-### A Mystery Publication!
+### Um Mistério da Publicação!
 
-////
+Se você pensar de novo no Capítulo 4, talvez você se lembre que ao desativiar o `autopublish`, nós paramos as coleções de automaticamente enviar toda informação do servidor para cada versão local da coleção dos clientes. Nós precisamos criar um par de publicação e assinatura para conectar a informação.
 
-////
+Ainda não configuramos nenhum tipo de publicação de usuário. Então como podemos ver informação de qualquer usuário que seja?
 
-////
+A resposta é que o pacote accounts de fato "auto-publica" as informaçãos básicas de conta do atual usuário logado sem se importar com o resto. Se não o fizesse, então esse usuário nunca conseguiria logar no site!
 
-////
+O pacote accounts apenas publica o usuário *atual* aliás. Isto explica porque um usuário não pode ver os detalhes da conta de outro.
 
-////
+Então a publicação está apenas publicando um objeto usuário por usuário logado (e nenhum quando você não está logado).
 
-////
+Ainda mais, documentos na nossa coleção usuários não parecem conter os mesmos campos no servidor e no cliente. Em Mongo, um usuário tem um monte de informação nele. Para vê-la, apenas vá de volta ao terminal Mongo e digite:
 
 ~~~bash
 > db.users.findOne()
 {
-  "createdAt" : 1365649830922,
-  "_id" : "kYdBd9hr3fWPGPcii",
-  "services" : {
-    "password" : {
-      "srp" : {
-        "identity" : "qyFCnw4MmRbmGyBdN",
-        "salt" : "YcBjRa7ArXn5tdCdE",
-        "verifier" : "df2c001edadf4e475e703fa8cd093abd4b63afccbca48fad1d2a0986ff2bcfba920d3f122d358c4af0c287f8eaf9690a2c7e376d701ab2fe1acd53a5bc3e843905d5dcaf2f1c47c25bf5dd87764d1f58c8c01e4539872a9765d2b27c700dcdedadf5ac82521467356d3f91dbeaf9848158987c6d359c5423e6b9cabf34fa0b45"
-      }
-    },
-    "resume" : {
-      "loginTokens" : [
-        {
-          "token" : "BMHipQqjfLoPz7gru",
-          "when" : 1365649830922
-        }
-      ]
-    }
-  },
-  "username" : "tmeasday"
+	"createdAt" : 1365649830922,
+	"_id" : "kYdBd9hr3fWPGPcii",
+	"services" : {
+		"password" : {
+			"srp" : {
+				"identity" : "qyFCnw4MmRbmGyBdN",
+				"salt" : "YcBjRa7ArXn5tdCdE",
+				"verifier" : "df2c001edadf4e475e703fa8cd093abd4b63afccbca48fad1d2a0986ff2bcfba920d3f122d358c4af0c287f8eaf9690a2c7e376d701ab2fe1acd53a5bc3e843905d5dcaf2f1c47c25bf5dd87764d1f58c8c01e4539872a9765d2b27c700dcdedadf5ac82521467356d3f91dbeaf9848158987c6d359c5423e6b9cabf34fa0b45"
+			}
+		},
+		"resume" : {
+			"loginTokens" : [
+				{
+					"token" : "BMHipQqjfLoPz7gru",
+					"when" : 1365649830922
+				}
+			]
+		}
+	},
+	"username" : "tmeasday"
 }
 ~~~
 <%= caption "Mongo console" %>
 
-////
+Por outro lado, no navegador o objeto usuário é muito reduzido, como você pode ver ao digitar o comando equivalente:
 
 ~~~js
 ❯ Meteor.users.findOne();
@@ -164,7 +164,6 @@ Object {_id: "kYdBd9hr3fWPGPcii", username: "tmeasday"}
 ~~~
 <%= caption "Browser console" %>
 
-////
+Este examplo nos mostra como uma coleção local pode ser um *subconjunto seguro* do verdadeiro banco de dados. O usuário logado vê apenas o suficiente do conjunto de dados para funcionar (neste caso, logar). Este é um padrão útil a se aprender, como você verá mais adiante.
 
-////
-
+Isso não significa que você não possa tornar pública mais informação sobre o usuário se você quiser. Você pode checar o [Meteor docs](http://docs.meteor.com/#meteor_users) para ver como opcionalmente publicar mais campos na coleção `Meteor.users`.
