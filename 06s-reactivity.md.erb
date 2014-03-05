@@ -8,13 +8,13 @@ contents: Aprende sobre o sistema de dependência de código reativo no Meteor.|
 paragraphs: 20
 ---
 
-////
+Se as coleções são as ferramentas centrais do Meteor, então *reatividade* é a crosta que faz o centro útil.
 
-////
+Coleções transformam radicalmente a forma como seu aplicativo lida com mudanças na informação. Ao invés de ter de checar por mudanças na informação manualmente (vulgo através de chamadas AJAX) e então costurar essas mudanças no HTML, mudanças na informação podem então vir a qualquer momento e serem aplicadas à interface do usuário sem problemas.
 
-////
+Tome um momento para pensar nisso direito: por trás das cortinas, o Meteor é capaz de mudar *qualquer* parte da interface do usuário quando uma coleção subjacente é atualizada.
 
-////
+A forma *imperativa* para se fazer isso seria usar `.observe()`, uma função cursor que dispara callbacks quando documentos correspondentes ao cursor mudam. Nós então poderíamos fazer mudanças ao DOM (o HTML renderizado da nossa página web) através desses callbacks. O código resultante se pareceria com algo assim:
 
 ~~~js
 Posts.find().observe({
@@ -33,25 +33,25 @@ Posts.find().observe({
 });
 ~~~
 
-////
+Você já pode provavelmente perceber como tal código ficará complexo bem rapidamente. Imagine lidar com mudanças em *cada atributo* da postagem, e ter de fazer mudanças complexas ao HTML dentro dos `<li>` da postagem. Sem mencionar em todos os casos fronteiriços que podem surgir quando nós começamos a precisar de múltiplas fontes de informação que todas podem mudar em tempo real.
 
 <% note do %>
 
-### When *Should* We Use `observe()`?
+### Quando *devemos* Usar `observe()`?
 
-////
+Usar o padrão acima é às vezes necessário, especialmente quando se lida com widgets de terceiros. Por exemplo, vamos imaginar que nós queremos adicionar e remover alfinetes de um mapa em tempo real baseado em informação de uma Coleção (digamos, para mostrar as localizações dos usuários logados agora).
 
-////
+Em tais casos, você precisará fazer callbacks do `observe()` para fazer o mapa "conversar" com a coleção do Meteor e como reagir às mudanças da informação. Por exemplo, você precisaria dos callbacks `added` e `removed` para chamar os métodos `dropPin()` ou `removePin()` da API do mapa.
 
 <% end %>
 
-### A Declarative Approach
+### Um approach declarativo
 
-////
+O Meteor provê a nós uma forma melhor: reatividade, a qual é em sumo um approach **declarativo**. Sendo declarativo ele nos permite definir a relação entre objetos uma vez e saber que eles permaneceram em sincronia, ao invés de ter de especificar comportamentos para cada possível mudança. 
 
-////
+Este é um conceito poderoso, porque um sistema em tempo real tem muitos inputs que podem todos mudar em momentos imprevisíveis. Ao afirmar declarativamente como nós renderizamos HTML baseado em qualquer fonte de informação reativa com que nos importamos, Meteor pode tomar conta do serviço de monitorar essas fontes e transparentemente cuidar do trabalho bagunçado de manter a interface do usuário atualizada.
 
-////
+Tudo isso para dizer que ao invés de pensar sobre callbacks do `observe`, o Meteor deixa a gente escrever:
 
 ~~~html
 <template name="postsList">
@@ -63,7 +63,7 @@ Posts.find().observe({
 </template>
 ~~~
 
-////
+E então pega nossa lista de postagens com:
 
 ~~~js
 Template.postsList.helpers({
@@ -73,23 +73,23 @@ Template.postsList.helpers({
 });
 ~~~
 
-////
+Por trás das cortinas, o Meteor está armando callbacks do `observe()` para nós, e re-desenhando seguimentos relevantes de HTML quando a informação reativa muda.
 
-### Dependency Tracking in Meteor: Computations
+### Monitoramento de Dependências em Meteor: Computações
 
-////
+Apesar do Meteor ser um framework reativo, em tempo real, nem *todo* código dentro de um aplicativo em Meteor é reativo. Se este fosse o caso, todo seu aplicativo rodaria de novo cada vez que qualquer coisa mudasse. Então, a reatividade é limitada a áreas específicas do seu código, e nós podemos chamar essas áreas de **computações**.
 
-////
+Em outras palavras, a computação é um bloco de código que roda cada vez que uma das fontes de informação reativa na qual ela depende muda. Se você tem uma fonte de informação reativa (por exemplo, uma variável de Sessão) e gostaria de responder reativamente a ela, você precisará configurar uma computação para tanto.
 
-////
+Note que você geralmente não precisa fazer isso explicitamente porque o Meteor dá às renderizações de cada template sua própria computação (o que significa dizer que o código nos ajudantes de template e callbacks são reativos por padrão).
 
-////
+Cada fonte de informação reativa monitora todas as computações que a estão usando para que poder informá-las quando seu próprio valor mudar. Para tanto, ela chama a função `invalidate()` na computação.
 
-////
+Computações são geralmente configuradas a simplesmente re-avaliar seus conteúdos on invalidation, e isto é o que ocorre nas computações do template (apesar que as computações do template também fazem alguma mágica ao tentar renderizar a página o mais eficientemente). Apesar que você pode ter mais controle quanto ao que cada computação faz on invalidation se você precisar, na prático isto não será algo que vocé fará com freqüência.
 
-### Setting Up a Computation
+### Configurando uma Computação
 
-////
+Agora que nós entendemos a teoria por trás das computações, configurar uma de fato parecerá desproporcionalmente fácil. Nós simplesmente usamos a função `Deps.autorun` para envolver um bloco de código na computação e fazê-lo reativo:
 
 ~~~js
 Deps.autorun(function() {
@@ -97,11 +97,11 @@ Deps.autorun(function() {
 });
 ~~~
 
-////
+Por trás das cortinas, `autorun` cria uma computação, e a configura para re-avaliar quando as fontes de informação na qual ela depende mudam. Nós configuramos uma computação bem simples que simplesmente informa o número de postagens para o console. Já que `Posts.find()` é uma fonte de informação reativa, ela tomará conta de informar a computação para re-avaliar cada vez que o número de postagens mudar.
 
 ~~~js
 > Posts.insert({title: 'New Post'});
 There are 4 posts.
 ~~~
 
-////
+O resultado em rede de tudo isso é que nós podemos escrever código que usa informação reativa de uma forma bem natural, sabendo que por trás das cortinas o sistema de dependência toma conta de rodar novamente bem na hora certa.
