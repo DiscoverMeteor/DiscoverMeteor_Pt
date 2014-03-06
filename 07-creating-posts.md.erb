@@ -7,13 +7,13 @@ contents: Aprenda como enviar um artigo no lado do cliente.|Implemente uma simpl
 paragraphs: 60
 ---
 
-////
+Nós vimos como é fácil criar artigos através do console, usando a chamada `Posts.insert` ao banco de dados, mas nós não podemos esperar que nossos usuários abram o console para criar um novo artigo.  
 
-////
+Eventualmente, nós precisaremos construir alguma forma de interface do usuário para permitir aos nossos usuários postar novos artigos no nosso aplicativo.
 
-### Building The New Post Page
+### Construindo uma Nova Página de Artigo
 
-////
+Nós começamos por definir a rota para a nossa nova página:
 
 ~~~js
 Router.configure({
@@ -24,12 +24,12 @@ Router.configure({
 
 Router.map(function() {
   this.route('postsList', {path: '/'});
-
+  
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-
+  
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -38,11 +38,11 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "13~15" %>
 
-////
+Nós estamos usando a função `data` do roteador para configurar um contexto de informação do template `postPage`. Lembre-se que o quer que ponhamos nesse contexto de informação estará disponível ao `this` de dentro dos ajudantes de template.
 
-### Adding A Link To The Header
+### Adicionando um Link ao Cabeçalho
 
-////
+Com essa rota definida, nós podemos agora adicionar um link a nossa página de envio no nosso cabeçalho:
 
 ~~~html
 <template name="header">
@@ -69,7 +69,7 @@ Router.map(function() {
 <%= caption "client/views/includes/header.html" %>
 <%= highlight "11~16" %>
 
-////
+Configurar a nossa rota signifca que se o usuário procurar pela URL `/submit`, o Meteor mostrará o template `postSubmit`. Então vamos escrever esse template:
 
 ~~~html
 <template name="postSubmit">
@@ -93,7 +93,7 @@ Router.map(function() {
         <div class="controls">
             <textarea name="message" type="text" value=""/>
         </div>
-    </div>
+    </div> 
 
     <div class="control-group">
         <div class="controls">
@@ -106,27 +106,27 @@ Router.map(function() {
 ~~~
 <%= caption "client/views/posts/post_submit.html" %>
 
-////
+Note: isto é um monte de marcação, mas ela simplesmente advém de se usar o Twitter Bootstrap. Apesar de apenas os elementos de formulário serem essenciais, a marcação extra ajudará o nosso aplicativo a parecer um pouco melhor. Agora ele deverá se parecer com algo assim:
 
 <%= screenshot "7-1", "The post submit form" %>
 
-////
+Este é um simples formulário. Nós não precisamos nos preocupar com a ação para ele, já que nós estaremos interceptando eventos de envio no formulário e atualizando a informação via JavaScript. (Não faz sentido prover um plano reserva sem ser em JS quando se considera que um aplicativo em Meteor é completamente não funcional quando o JavaScript está desativado).
 
-### Creating Posts
+### Criando Artigos
 
-////
+Vamos ligar um manuseador de evento ao evento `submit` do formulário. É melhor usar o evento `submit` (ao invés de digamos um evento `click` no botão), já que ele cobrirá todas maneiras possíves de envio (tais como apertar enter no campo da URL por exemplo).
 
 ~~~js
 Template.postSubmit.events({
   'submit form': function(e) {
     e.preventDefault();
-
+    
     var post = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val(),
       message: $(e.target).find('[name=message]').val()
     }
-
+    
     post._id = Posts.insert(post);
     Router.go('postPage', post);
   }
@@ -136,30 +136,30 @@ Template.postSubmit.events({
 
 <%= commit "7-1", "Added a submit post page and linked to it in the header." %>
 
-////
+Esta função usa [jQuery](http://jquery.com) para analisar os valores dos vários campos do formulário, e povoar o novo objeto artigo com os resultados. Nós precisamos assegurar que nós `preventDefault` no argumento do `event` do nosso manuseador para garantir que o navegador não vá adiante e tente enviar o formulário.
 
-////
+Finalmente, nós podemos redirecionar a nossa nova página do artigo. A função `insert()` numa coleção retorna a `id` gerada para o objeto que foi inserido no banco de dados, a qual a função `go()` do Roteador usará para construir a URL para nós navegarmos até.
 
-////
+O resultado em rede é que o usuário aperta enviar, o artigo é criado, e o usuário é instantaneamente levado à página de discussão para este novo artigo.
 
-### Adding Some Security
+### Adicionando Alguma Segurança
 
-////
+Criar artigos está todo certo, mas nós não queremos permitir que visitantes aleatórios o façam: nós queremos que eles precisem estar logados para tanto. Claro, nós podemos começar escondendo dos usuários não logados o formulário de novo artigo. Mesmo assim, um usuário poderia concebivelmente criar um artigo no console do navegador sem estar logado, e nós não queremos isso.
 
-////
+Agradecidamente a segurança de informação está inserida diretamente nas coleções Meteor; a questão é que ela fica desligada por padrão quando você cria um novo projeto. Isso permite que você comece facilmente e construa seu aplicativo deixando a parte chata para mais tarde.
 
-////
+Nosso aplicativo não precisa mais de rodinhas, então vamos tirá-las! Nós removeremos o pacote `insecure`:
 
 ~~~bash
 $ meteor remove insecure
 ~~~
 <%= caption "Terminal" %>
 
-////
+Após o fazê-lo, nocê notará que o formulário de artigo não funciona mais. Isto é porque sem o pacote `insecure`, inserções do lado do cliente na coleção posts _não são mais permitidas_. Nós precisamos ou dar regras explícitas ao Meteor sobre quando é OK para um cliente inserir artigos, ou fazer todas nossas inserções de artigo pelo lado do servidor.
 
-### Allowing Post Inserts
+### Permitindo Inserções de Artigo
 
-////
+Para começar, nós mostraremos como permitir inserções de artigos pelo lado do cliente para deixar nosso formulário funcionando de novo. Como de costume, nós eventualmente terminaremos com uma técnica diferente, mas por hora, o seguinte fará as coisas funcionarem de novo:
 
 ~~~js
 Posts = new Meteor.Collection('posts');
@@ -174,31 +174,31 @@ Posts.allow({
 <%= caption "collections/posts.js" %>
 <%= highlight "3~8" %>
 
-<%= commit "7-2", "Removed insecure, and allowed certain writes to posts." %>
+<%= commit "7-2", "Removed insecure, and allowed certain writes to posts." %> 
 
-////
+Nós chamamos `Posts.allow`, que diz ao Meteor "este é um conjunto de circunstâncias onde os clientes estão permitidos a fazer coisas à coleção `Posts`". Neste caso, nós estamos dizendo "clientes têm permissão de inserir artigos desde que eles tenham uma `userId`".
 
-////
+A `userId` do usuário fazendo a modificação é passada às chamadas `allow` and `deny` (ou retorna `null` se nenhum usuário estiver logado), o que é quase sempre útil. E como as contas de usuários são amarradas ao centro do Meteor, nós podemos contar com a `userId` estar sempre correta.
 
-////
+Nós conseguimos garantir que você precisará estar logado para criar um artigo. Tente deslogar e criar um artigo; você deve ver isto no console:
 
 <%= screenshot "7-2", "Insert failed: Access denied " %>
 
-////
+Entretanto, nós ainda temos de lidar com algumas questões:
 
- - ////
- - ////
- - ////
+ - Usuários não logados ainda conseguem alcançar o formulário de criação de artigo.
+ - O artigo não está ligado ao usuário de forma alguma (e não há código no servidor que garanta isso).
+ - Múltiplos artigos podem ser criados que apontem para a mesma URL.
 
-////
+Vamos consertar esses problemas.
 
-### Securing Access To The New Post Form
+### Protegendo o Acesso ao Formulário de Novo Artigo
 
-////
+Vamos começar prevenindo usuários não logados de ver o formulário de envio de artigo. Nós faremos isso no nível do roteador, definindo um *gancho de rota*.
 
-////
+Um gancho intercepta um processo de roteamento e potencialmente muda a ação que o roteador toma. Você pode pensá-lo como um segurança que checa suas credenciais antes de permitir que você entre (ou te recusar).
 
-////
+O que nós precisamos fazer é checar se o usuário está logado, e se eles não estiverem renderizar o template `accessDenied` ao invés do esperado template `postSubmit` (nós então paramos o roteador de fazer qualquer outra coisa). Vamos modificar o router.js para tanto:
 
 ~~~js
 Router.configure({
@@ -207,12 +207,12 @@ Router.configure({
 
 Router.map(function() {
   this.route('postsList', {path: '/'});
-
+  
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-
+  
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -230,7 +230,7 @@ Router.before(requireLogin, {only: 'postSubmit'});
 <%= caption "lib/router.js" %>
 <%= highlight "18~25" %>
 
-////
+Nós também criamos o template da página acesso negado:
 
 ~~~html
 <template name="accessDenied">
@@ -241,29 +241,29 @@ Router.before(requireLogin, {only: 'postSubmit'});
 
 <%= commit "7-3", "Denied access to new posts page when not logged in." %>
 
-////
+Se você tentar ir a http://localhost:3000/submit/ sem estar logado, você deve ver isto:
 
 <%= screenshot "7-3", "The access denied template" %>
 
-////
+A coisa legal quanto a ganchos de roteamento é que eles são _reativos_. Isso signfica que nós podemos ser declarativos e não precisamos pensar em callbacks, ou similares, quando o usuário loga. Quando o estado de log-in do usuário muda, a página de template do Roteador muda instantaneamente de `accessDenied` para `postSubmit` sem que nós precisemos escrever nenhum código explícito para tanto.
 
-////
+Logue, e então tente atualizar a página. Você pode ver às vezes o template negado piscar por um breve momento antes da página de envio de artigo aparecer. A razão para tanto é que o Meteor começa renderizando templates o mais cedo possível, antes de conversar com o servidor e checar se o usuário atualmente (armazenado no banco local do navegador) sequer existe.
 
-////
+Para evitar este problema (que é uma classe de problemas comum que você verá mais quando você lidar com os detalhes da latência entre cliente e servidor), nós apenas mostraremos uma tela de loading pelo breve momento em que nós esperamos para ver se o usuário tem acesso ou não. 
 
-////
+Até mesmo porque neste estágio nós não sabemos se o usário tem as credenciais log-in corretas, e nós não podemos mostrar tanto `accessDenied` ou o template `postSubmit` até que saibamos.
 
-////
+Então nós modificamos no nosso gancho para usar o nosso template loading embora `Meteor.loggingIn()` seja verdadeiro:
 
 ~~~js
 Router.map(function() {
   this.route('postsList', {path: '/'});
-
+  
   this.route('postPage', {
     path: '/posts/:_id',
     data: function() { return Posts.findOne(this.params._id); }
   });
-
+  
   this.route('postSubmit', {
     path: '/submit'
   });
@@ -275,7 +275,7 @@ var requireLogin = function() {
       this.render(this.loadingTemplate);
     else
       this.render('accessDenied');
-
+    
     this.stop();
   }
 }
@@ -287,9 +287,9 @@ Router.before(requireLogin, {only: 'postSubmit'});
 
 <%= commit "7-4", "Show a loading screen while waiting to login." %>
 
-### Hiding the Link
+### Escondendo o Link
 
-////
+A maneira mais fácil de prevenir que os usuários cheguem a esta página por engano quando eles não estão logados é esconder o link deles. Nós podemos fazer isso bem facilmente:
 
 ~~~html
 <ul class="nav">
@@ -300,43 +300,43 @@ Router.before(requireLogin, {only: 'postSubmit'});
 
 <%= commit "7-5", "Only show submit post link if logged in." %>
 
-////
+O ajudante `currentUser` nos é provido pelo pacote `accounts` e é o handlebar equivalent de `Meteor.user()`. Já que é reativo, o link irá aparecer ou desaparecer ao você logar e deslogar do aplicativo.
 
-### Meteor Method: Better Abstraction and Security
+### Método Meteor: Abstração e Segurança Melhores
 
-////
+Nós conseguimos proteger o acesso à página de novo artigo de usuário não logados, e negar que tais usuários criem artigos mesmo que eles trapaceiem e usem o console. Porém ainda há mais algumas coisas que nós precisamos tomar conta:
 
-- ////
-- ////
-- ////
+- Timestamping os artigos.
+- Assegurar que uma mesma URL não seja publicada mais que uma vez.
+- Adicionar detalhes sobre o autor do artigo (ID, username, etc.).
 
-////
+Você talvez esteja pensando que nós podemos fazer tudo isso no nosso manuseador de evento `submit`, entretanto, nós rapidamente encontraríamos uma série de problemas:
 
-- ////
-- ////
-- ////
+- Para a timestamp, nós teríamos de contar com a corretude do tempo do computador do usuário, o qual nem sempre será o caso.
+- Clientes não saberam de _todas_ as URLs já publicadas no site. Eles apenas saberão dos artigos que eles podem ver atualmente (nós veremos como isso funciona exatamente mais tarde), então não há como garantir originalidade de URL pelo lado do cliente.
+- Finalmente, apesar que nós _poderíamos_ adicionar detalhes de usuário pelo lado do cliente, nós não poderíamos garantir sua acurácia, o que poderia abrir o nosso aplicativo para os usuários trapaceando pelo console do navegador.
 
-////
+Por todas essas razões, é melhor manter nossos manuseadores de evento simples e, se nós estivermos fazendo mais do que inserções e atualizações básicas à coleção, usemos um **Método**.
 
-////
+Um Método Meteor é uma função do lado do servidor que é chamada pelo lado do cliente. Nós temos alguma familiaridade com elas -- aliás, por trás das cortinas, as funções `insert`, `update` e `remove` da `Coleção` são todos Métodos. Vamos ver como criar o nosso próprio.
 
-////
+Vamos voltar a `post_submit.js`. Ao invés de inserir diretamente na coleção `Posts`, nós chamaremos um Método chamado `post`:
 
 ~~~js
 Template.postSubmit.events({
   'submit form': function(e) {
     e.preventDefault();
-
+    
     var post = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val(),
       message: $(e.target).find('[name=message]').val()
     }
-
+    
     Meteor.call('post', post, function(error, id) {
       if (error)
         return alert(error.reason);
-
+        
       Router.go('postPage', {_id: id});
     });
   }
@@ -344,9 +344,9 @@ Template.postSubmit.events({
 ~~~
 <%= caption "client/views/posts/post_submit.js" %>
 
-////
+A função `Meteor.call` chama um Método nomeado pelo seu primeiro argumento. Você pode prover argumentos à chamada (neste caso, o objeto `post` que nós construímos através do formulário), e finalmente anexar um callback, o qual executará quando o Método do lado do servidor estiver finalizado. Aqui nós simplesmente alertamos o usuário se houve algum problema, ou redirecionamos o usuário à recentemente criada página de discussão do artigo caso contrário. 
 
-////
+Nós definimos o Método no nosso arquivo `collections/posts.js`. Nós removeremos o bloco `allow()` do `posts.js` já que o Método Meteor ignora eles mesmo. Lembre-se que Métodos são executados no servidor, então o Meteor assume que eles sejam confiáveis.
 
 ~~~js
 Posts = new Meteor.Collection('posts');
@@ -355,31 +355,31 @@ Meteor.methods({
   post: function(postAttributes) {
     var user = Meteor.user(),
       postWithSameLink = Posts.findOne({url: postAttributes.url});
-
+    
     // ensure the user is logged in
     if (!user)
       throw new Meteor.Error(401, "You need to login to post new stories");
-
+    
     // ensure the post has a title
     if (!postAttributes.title)
       throw new Meteor.Error(422, 'Please fill in a headline');
-
+    
     // check that there are no previous posts with the same link
     if (postAttributes.url && postWithSameLink) {
-      throw new Meteor.Error(302,
-        'This link has already been posted',
+      throw new Meteor.Error(302, 
+        'This link has already been posted', 
         postWithSameLink._id);
     }
-
+    
     // pick out the whitelisted keys
     var post = _.extend(_.pick(postAttributes, 'url', 'title', 'message'), {
-      userId: user._id,
-      author: user.username,
+      userId: user._id, 
+      author: user.username, 
       submitted: new Date().getTime()
     });
-
+    
     var postId = Posts.insert(post);
-
+    
     return postId;
   }
 });
@@ -388,23 +388,23 @@ Meteor.methods({
 
 <%= commit "7-6", "Use a method to submit the post." %>
 
-////
+Este Método é um pouco complicado, mas felizmente você pode seguir adiante.
 
-////
+Primeiro, nós definimos nossa variável `user` e checamos se o artigo com o mesmo link já existe. Então, nós checamos para ver se o usuário está logado, jogando um erro (o qual eventualmente será `alert`-ado pelo navegador) caso contrário. Nós também fazemos alguma validação simples do objeto artigo para garantir que os nossos artigos tenham título.
 
-////
+Em seguida, se há outro artigo com a mesma URL, nós podemos lançar um erro `302` (o qual significa redirecionar) dizendo ao usuário que nós deveríamos ir e ver este artigo prévio.
 
-////
+A classe `Error` do Meteor recebe três argumentos. O primeiro (`error`) será o código numérico `302`, o segundo (`reason`) é uma pequena explicação legível por humanos do erro, e o último (`details`) pode ser qualquer informação útil adicional.
 
-////
+No nosso caso, nós usaremos este terceiro argumento para passar a ID do artigo que nós acabamos de encontrar. Spoiler alert: nós usaremos isso mais tarde para redirecionar o usuário para o artigo pré-existente.
 
-////
+Se todas essas checagens passarem, nós agarraremos os campos que nós queremos inserir (para garantir que o usuário que esteja chamando este Método não possa por informação falsa no nosso banco de dados), e incluiremos alguma informação sobre o usuário que envia -- assim como o tempo atual -- ao artigo.
 
-////
+Finalmente, nós inserimos o artigo, e retornamos a `id` do novo artigo ao usuário.
 
-### Sorting Posts
+### Organizando Artigos
 
-////
+Agora que nós temos data de envio em todos os nossos artigos, faz sentido assegurar que eles estejam organizados usando esse atributo. Para tanto, nós podemos usar o operador `sort` do Mongo, que espera um objeto feito de chaves pelas quais organizar, e um sinal indicando se de forma ascendente ou descendente.
 
 ~~~js
 Template.postsList.helpers({
@@ -418,6 +418,6 @@ Template.postsList.helpers({
 
 <%= commit "7-7", "Sort posts by submitted timestamp." %>
 
-////
+Levou um pouco de trabalho, mas nós finalmente temos uma interface do usuário para deixar nossos usuários adicionar conteúdo seguramente ao nosso aplicativo!
 
-////
+Mas qualquer aplicativo que permite ao usuário criar conteúdo também precisa deixá-los editá-lo e deletá-lo. Sobre isso que se tratará o capítulo Editando Artigos.
