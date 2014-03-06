@@ -186,23 +186,23 @@ Note que `{{>spinner}}` é um template parcial contido no pacote `spin`. Apesar 
 
 <% note do %>
 
-### A First Glance At Reactivity
+### Um Primeiro Olhar Sobre A Reatividade
 
-Reactivity is a core part of Meteor, and although we've yet to really touch on it, our loading template gives us a first glance at this concept. 
+Reatividade é um conceito chave de Meteor, e apesar de ainda não termos realmente abordado o tópico, o nosso template de carregamento dá-nos um primeiro olhar sobre este conceito.
 
-Redirecting to a loading template if data isn't loaded yet is all well and good, but how does the router know when to redirect the user *back* to the right page once the data comes through?
+Redirecionar para um template de carregamente se os dados ainda não foram carregados está muito bem, mas como é que o roteador sabe quando deve redirecionar o utilizador *de volta* para a página correcta assim que os dados foram carregados?
 
-For now, let's just say that this is exactly where reactivity comes in, and leave it at this. But don't worry, you'll learn more about it very soon!
+Por agora, vamos apenas dizer que isto é exactamente onde a reatividade entra, e ficar por aqui. Mas não se preocuope, vai aprender mais sobre o assunto brevemente!
 
 <% end %>
 
-### Routing To A Specific Post
+### Routeando Para Um Post Específico
 
-Now that we've seen how to route to the `postsList` template, let's set up a route to display the details of a single post. 
+Agora que vimos como routear para o template `postsList`, vamos criar uma rota para mostrar os detalhes de um único post.
 
-There's just one catch: we can't go ahead and define one route per post, since there might be hundreds of them. So we'll need to set up a single *dynamic* route, and make that route display any post we want. 
+Existe apenas um problema: nós não podemos prosseguir e definir uma rota por post, já que pode haver centenas deles. Neste caso é necessário definir uma única rota *dinâmica*, e fazer essa rota mostrar qualquer post que queiramos.
 
-To start with, we'll create a new template that simply renders the same post template that we used earlier in the list of posts.
+Para começar, vamos criar um novo template que simplesmente renderiza o mesmo template de post que utilizámos anteriormente na lista de posts.
 
 ~~~html
 <template name="postPage">
@@ -211,9 +211,9 @@ To start with, we'll create a new template that simply renders the same post tem
 ~~~
 <%= caption "client/views/posts/post_page.html" %>
 
-We'll add more elements to this template later on (such as comments), but for now it'll simply serve as a shell for our `{{> postItem}}` include. 
+Posteriormente vamos adicionar mais elementos a este template (como por exemplo comentários), mas por agora este vai servir simplesmente como um contentor para a nossa inclusão `{{> postItem}}`.
 
-We are going to create another named route, this time mapping URL paths of the form `/posts/<ID>` to the `postPage` template:
+Vamos criar outra rota com nome, desta vez mapeando caminhos URL na forma `/posts/<ID>` para o template `postPage`:
 
 ~~~js
 Router.map(function() {
@@ -228,9 +228,9 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "4~6" %>
 
-The special `:_id` syntax tells the router two things: first, to match any route of the form `/posts/xyz/`, where “xyz” can be anything at all. Second, to put whatever it finds in this “xyz” spot inside an `_id` property in the router's `params` array. 
+A sintaxe especial `:_id` indica ao routeador duas coisas: primeiro, para combinar qualquer rota na forma `/posts/xyz/`, onde "xyz" pode ser qualquer coisa. Segunda, para por seja o que for que encontrar neste "xyz" dentro de uma propriedade `_id` na lista `params` do routeador.
 
-Note that we're only using `_id` for convenience's sake here. The router has no way of knowing if you're passing it an actual `_id`, or just some random string of characters. 
+Note que estamos apenas a usar `_id` por uma questão de conveniencia. O routeador não ter forma de saber se você lhe está a passar realmente um `_id`, ou uma string aleatória de caracteres.
 
 We're now routing to the correct template, but we're still missing something: the router knows the `_id` of the post we'd like to display, but the template still has no clue. So how do we bridge that gap?
 
