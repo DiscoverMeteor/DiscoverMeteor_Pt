@@ -232,13 +232,13 @@ A sintaxe especial `:_id` indica ao routeador duas coisas: primeiro, para combin
 
 Note que estamos apenas a usar `_id` por uma questão de conveniencia. O routeador não ter forma de saber se você lhe está a passar realmente um `_id`, ou uma string aleatória de caracteres.
 
-We're now routing to the correct template, but we're still missing something: the router knows the `_id` of the post we'd like to display, but the template still has no clue. So how do we bridge that gap?
+Estamos agora a routear para o template correcto, mas ainda nos falta alguma coisa: o routeador sabe o `_id` do post que queremos mostrar, mas o template não faz ideia de qual é. Então, como é que davamos a volta a este problema?
 
-Thankfully, the router has a clever built-in solution: it lets you specify a template's **data context**. You can think of the data context as the filling inside a delicious cake made of templates and layouts. Simply put, it's what you fill up your template with:
+Felizmente, o routeador tem uma solução inteligente: este deixa especificar o **contexto de dados** do template. Pode-se pensar no contexto de dados como o recheio dentro de um bolo delicioso feito de templates e layouts. De forma simples, é o que se usa para encher o template:
 
 <%= diagram "router-diagram-2", "The data context.", "pull-center" %>
 
-In our case, we can get the proper data context by looking for our post based on the `_id` we got from the URL: 
+No nosso caso, podemos ir buscar o contexto de dados adequado procurando pelo post usando o `_id` que obtivemos do URL:
 
 ~~~js
 Router.map(function() {
@@ -254,17 +254,17 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "4~7" %>
 
-So every time a user accesses this route, we'll find the appropriate post and pass it to the template. Remember that `findOne` returns a single post that matches a query, and that providing just an `id` as an argument is a shorthand for `{_id: id}`. 
+Assim, cada vez que o utilizador acede a esta rota, ele vai encontrar o post correspondente e vai passá-lo ao template. Lembre-se que `findOne` devolve um único post que corresponde a uma pesquisa, e que providenciar apenas um `_id` como argumento é um atalho para `{_id: id}`.
 
-Within the `data` function for a route, `this` corresponds to the currently matched route, and we can use `this.params` to access the named parts of the route (which we indicated by prefixing them with `:` inside our `path`).
+Dentro da função `data` (dados em português) para uma rota, `this` corresponde à rota atual, e podemos utilizar `this.params` para aceder às partes com nome da rota (partes que indicámos prefixando-as com `:` dentro da nossa `path`).
 
 <% note do %>
 
-### More About Data Contexts
+### Mais Sobre Contexo de Dados
 
-By setting a template's *data context*, you can control the value of `this` inside template helpers.
+Ao definir o *contexto de dados* de um template, pode controlar o valor de `this` dentro de um ajudante de template.
 
-This is usually done implicitly with the `{{#each}}` iterator, which automatically sets the data context of each iteration to the item currently being iterated on:
+Isto é normalmente feito implicitamente com o iterador `{{#each}}`, que automáticamente define o contexo de dados de cada iteração para o item atual da interação:
 
 ~~~html
 {{#each widgets}}
@@ -272,7 +272,7 @@ This is usually done implicitly with the `{{#each}}` iterator, which automatical
 {{/each}}
 ~~~
 
-But we can also do it explicitly using `{{#with}}`, which simply says "take this object, and apply the following template to it". For example, we can write:
+Mas também o podemos fazer explicitament utilizando `{{#with}}`, que simplesmente diz "toma este objecto, e aplica-lhe este template". Por exemplo, podemos escrever:
 
 ~~~html
 {{#with myWidget}}
@@ -280,7 +280,7 @@ But we can also do it explicitly using `{{#with}}`, which simply says "take this
 {{/with}}
 ~~~
 
-It turns out you can achieve the same result by passing the context as an *argument* to the template call. So the previous block of code can be rewritten as:
+Também é possível obter o mesmo efeito passando o contexto como um *argumento* da chamada ao template. Ou seja, o bloco anterior de código pode ser re-escrito como:
 
 ~~~js
 {{> widgetPage myWidget}}
@@ -288,11 +288,11 @@ It turns out you can achieve the same result by passing the context as an *argum
 
 <% end %>
 
-### Using a Dynamic Named Route Helper
+### Utilizando Um Ajudante de Routeador Com Nome Dinâmico
 
-Finally, we need to make sure that we're pointing to the right place whevener we want to link to an individual post. Again, we could do something like `<a href="/posts/{{_id}}">`, but using a route helper is just more reliable. 
+Por fim, temos de ter a certeza que estamos a apontar para o lugar certo quando queremos fazer um link para um post indivídual. Novamente, podemos usar algo como `<a href="/posts/{{_id}}">`, mas usar um ajudante de routeador é mais seguro.
 
-We've named the post route `postPage`, so we can use a `{{pathFor 'postPage'}}` helper:
+Chamámos a rota do post `postPage`, por isso podemos usar um ajudante `{{pathFor 'postPage'}}`:
 
 ~~~html
 <template name="postItem">
@@ -308,15 +308,15 @@ We've named the post route `postPage`, so we can use a `{{pathFor 'postPage'}}` 
 <%= highlight "6" %>
 <%= commit "5-3", "Routing to a single post page." %>
 
-But wait, how exactly does the router know where to get the `xyz` part in `/posts/xyz`? After all, we're not passing it any `_id`. 
+Mas espera, como exactamente é que o routeador sabe onde ir buscar a parte do xyz em `/posts/xyz`? No final de contas, não lhe estamos a passar nenhum `_id`.
 
-It turns out that Iron Router is smart enough to figure it out by itself. We're telling the router to use the `postPage` route, and the router knows that this route requires an `_id` of some kind (since that's how we defined our `path`) .
+Na realidade, o Iron Router é suficientemente inteligente para perceber isso por si próprio. Nós estamos a dizer ao routeador para usar a rota `postPage`, e o routeador sabe que esta rota precisa de um `_id` de alguam espécie (dado que foi assim que definimos a nossa `path`) .
 
-So the router will look for this `_id` in the most logical place available: the data context of the `{{pathFor 'postPage'}}` helper, in other words `this`. And it so happens that our `this` corresponds to a post, which (surprise!) does possess an `_id` property. 
+Assim, o routeador vai procurar por este `_id` no local mais lógico disponível: o contexto de dados do ajudante `{{pathFor 'postPage'}}`, ou notras palavras `this`. E acontece que o nosso `this` corresponde a um post, que (surpresa!) tem uma propriedade `_id`.
 
-Alternatively, you can also explicitely tell the router where you'd like it to look for the `_id` property, by passing a second argument to the helper (i.e. `{{pathFor 'postPage' someOtherPost}}`). A practical use of this pattern would be getting the link to the previous or next posts in a list, for example. 
+Alternativamente, também é possível dizer explicitamente ao routeador onde é que ele deve procurar pela propriedade `_id`, passando um segundo arguemnto ao ajudante (ou seja, `{{pathFor 'postPage' someOtherPost}}`). Um possível cenário onde este padrão poderá ser usado é ao construir o link para o post anterior ou seguinte numa lista.
 
-To see if it works correctly, browse to the post list and click on one of the 'Discuss' links. You should see something like this:
+Para verificar se funciona corretamente, navegue para a lista de posts e clique num dos links `Discuss`. Deve ver algo como:
 
 <%= screenshot "5-2", "A single post page." %>
 
@@ -324,10 +324,10 @@ To see if it works correctly, browse to the post list and click on one of the 'D
 
 ### HTML5 pushState
 
-One thing to realise is that these URL changes are happening using [HTML5 pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history?redirectlocale=en-US&redirectslug=Web%2FGuide%2FDOM%2FManipulating_the_browser_history). 
+Uma coisa a perceber é que estas mudanças de URL estão a ser feitas utilizando [HTML5 pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history?redirectlocale=en-US&redirectslug=Web%2FGuide%2FDOM%2FManipulating_the_browser_history).
 
-The Router picks up clicks on URLs that are internal to the site, and prevents the browser from browsing away from the app, instead just making the necessary changes to the app's state. 
+O Routeador apanha cliques em URLs que são internos ao site, e evita que o navegador navega para fora da aplicação, e em vez disso faz as alterações necessárias ao estado da aplicação.
 
-If everything is working correctly the page should change instantaneously. In fact, sometimes things change so fast that some kind of page transition might be needed. This is outside of the scope of this chapter, but an interesting topic nonetheless.
+Se tudo funcionar corretamente, a página deve mudar de forma instantânea. De facto, às vezes as coisas mudam tão rápido que pode ser necessária uma transição de página. Isto está fora do ambito deste capítulo, mas não deixa de ser um tópico interessante.
 
 <% end %>
