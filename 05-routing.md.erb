@@ -9,13 +9,13 @@ paragraphs: 72
 
 Agora que temos uma lista de artigos (que eventualmente poderão ser criados pelos utilizadores), precisamos de uma página individual para cada artigo onde os nossos utilizadores poderão discutir cada artigo.
 
-Nós gostariamos que essas páginas pudessem ser acessível através de um *permalink*, um URL no formato `http://myapp.com/posts/xyz` (onde `xyz` é um indentificador `_id` de MongoDB) único para cada artigo.
+Nós gostaríamos que essas páginas pudessem ser acessível através de um *permalink*, um URL no formato `http://myapp.com/posts/xyz` (onde `xyz` é um identificador `_id` de MongoDB) único para cada artigo.
 
-Isto significa que vamos precisar de algum tipo de *roteamento* para ler o que está na barra de URL do navegador e mostrar o conteúdo correcto.
+Isto significa que vamos precisar de algum tipo de *roteamento* para ler o que está na barra de URL do navegador e mostrar o conteúdo correto.
 
 ### Adicionando o Pacote Iron Router
 
-[Iron Router](https://github.com/EventedMind/iron-router) é um pacote de roteamento que foi criado específicamente para aplicações Meteor.
+[Iron Router](https://github.com/EventedMind/iron-router) é um pacote de roteamento que foi criado especificamente para aplicações Meteor.
 
 Este não só ajuda com roteamento (ou seja, especificar caminhos), como também permite tratar de filtros (associar ações a alguns dos caminhos) e ainda gerir subscrições (controlar que caminho tem acesso a que dados). (Nota: o Iron Router foi desenvolvido em parte pelo co-autor do *Discover Meteor* Tom Coleman.)
 
@@ -26,13 +26,13 @@ $ mrt add iron-router
 ~~~
 <%= caption "Consola" %>
 
-Este comando baixa e instala o pacote iron-router na nossa aplicação, pronto a usar. Note que por vezes pode ser necessário reeniciar a sua aplicação Meteor (usando `ctrl+c` para matar o processo, e depois `mrt` para o iniciar novamente) antes de o pacote poder ser utilizado.
+Este comando baixa e instala o pacote iron-router na nossa aplicação, pronto a usar. Note que por vezes pode ser necessário reiniciar a sua aplicação Meteor (usando `ctrl+c` para matar o processo, e depois `mrt` para o iniciar novamente) antes de o pacote poder ser utilizado.
 
 Note que o Iron Router é um pacote de terceiros, ou seja é necessário ter o Meteorite para o poder instalar (`meteor add iron-router` não vai funcionar).
 
 <% note do %>
 
-### Vocavulário de Roteador
+### Vocabulário de Roteador
 
 Nós vamos falar de várias características diferentes do roteador neste capítulo. Se tiver alguma experiência com uma framework como Rails, você já estará familiarizado com a maioria desses conceitos. Caso contrário, segue-se um pequeno glossário:
 
@@ -51,11 +51,11 @@ Para mais informação sobre o Iron Router, consulte [a documentação completa 
 
 ### Roteamento: Mapear URLs para Templates
 
-Até agora, nós construimos o nosso layout utilizando inclusões de templates hard-coded (tais como `{{>postsList}}`). Por isso, apesar de o conteúdo da nossa aplicação poder mudar, a estrutura base da página é sempre a mesma: um cabeçalho, com uma lista de artigos por baixo deste.
+Até agora, nós construímos o nosso layout utilizando inclusões de templates hard-coded (tais como `{{>postsList}}`). Por isso, apesar de o conteúdo da nossa aplicação poder mudar, a estrutura base da página é sempre a mesma: um cabeçalho, com uma lista de artigos por baixo deste.
 
 O Iron Router permite-nos outra abordagem ao ficar responsável pelo que é renderizado dentro da tag HTML `<body>`. Ou seja, nós não precisamos de definir o conteúdo dessa tag por nós próprios, como faríamos numa página HTML normal. Em vez disso, vamos apontar o roteador para um template layout especial que contem um ajudante de template `{{yield}}`.
 
-O ajudante `{{yield}}` vai definir uma zona dinâmica especial que vai automáticamente renderizar o template correspondente à rota atual (como convenção, vamos designar, a partir de agora, este template especial como o "template da rota"):
+O ajudante `{{yield}}` vai definir uma zona dinâmica especial que vai automaticamente renderizar o template correspondente à rota atual (como convenção, vamos designar, a partir de agora, este template especial como o "template da rota"):
 
 <%= diagram "router-diagram", "Layouts e templates.", "pull-center" %>
 
@@ -90,7 +90,7 @@ Enquanto que o recém criado `layout.html` vai agora conter o layout mais exteri
 
 Note que substituímos a inclusão do template `postsList` com uma chamada ao ajudante `yield`. Repare que depois desta alteração, não vemos nada no ecrã. Isto é porque ainda não dissemos ao roteador o que fazer com o URL `/`, e neste caso é mostrado um template vazio.
 
-Para começar, nós podemos recuperar o comportamento antigo mapeando o URL raiz `/` para o template `postsList` . Vamos criar uma directoria `/lib` na raiz do nosso projecto, e dentro desta criar `router.js` :
+Para começar, nós podemos recuperar o comportamento antigo mapeando o URL raiz `/` para o template `postsList` . Vamos criar uma diretoria `/lib` na raiz do nosso projecto, e dentro desta criar `router.js` :
 
 ~~~js
 Router.configure({
@@ -107,23 +107,23 @@ Fizemos duas coisas importantes. Primeiro, dissemos ao roteador para usar o layo
 
 <% note do %>
 
-### A directoria `/lib`
+### A diretoria `/lib`
 
-Qualquer coisa que seja colocada dentro da directoria `/lib` é garantidamente carregado antes que qualquer outra coisa na sua aplicação (com a possível excepção de pacotes inteligentes). Isto faz com que seja um óptimo lugar para código de ajudantes que precisa de estar sempre disponível.
+Qualquer coisa que seja colocada dentro da diretoria `/lib` é garantidamente carregado antes que qualquer outra coisa na sua aplicação (com a possível excepção de pacotes inteligentes). Isto faz com que seja um óptimo lugar para código de ajudantes que precisa de estar sempre disponível.
 
-Um aviso: note que como a directoria `/lib` não está nem dentro de `/client` nem de `/server`, isto significa que os seus conteúdos estaram disponíveis em ambos os ambientes.
+Um aviso: note que como a diretoria `/lib` não está nem dentro de `/client` nem de `/server`, isto significa que os seus conteúdos estarão disponíveis em ambos os ambientes.
 
 <% end %>
 
 ### Rotas com Nome
 
-Vamos esclecer alguma da ambiguidade. Chamámos à nossa rota `postsList`, mas também temos um *template* chamado `postsList`. O que é que se está aqui a passar?
+Vamos esclarecer alguma da ambiguidade. Chamámos à nossa rota `postsList`, mas também temos um *template* chamado `postsList`. O que é que se está aqui a passar?
 
-Por omissão, o Iron Roter vai procurar por um template com o mesmo nome da rota. Na realidade, ele vai até procurar por um *caminho* baseado no nome da rota, ou seja, se não tivessemos definido um caminho personalizado (que fizemos ao providenciar uma opção `path` na nossa defenição de roteador), o nosso template não estaria acessível por omissão no URL `postsList`.
+Por omissão, o Iron Roter vai procurar por um template com o mesmo nome da rota. Na realidade, ele vai até procurar por um *caminho* baseado no nome da rota, ou seja, se não tivéssemos definido um caminho personalizado (que fizemos ao providenciar uma opção `path` na nossa definição de roteador), o nosso template não estaria acessível por omissão no URL `postsList`.
 
 Outra dúvida possível é porque é que precisamos sequer de dar um note às nossas rotas. Dar nomes a rotas permite-nos utilizar algumas características do Iron Router que tornam mais fácil criar links dentro da nossa aplicação. O mais útil é o ajudante Handlebars `{{pathFor}}`, que devolve o caminho URL de qualquer rota.
 
-Queremos que o nosso link principal de casa aponte para a lista de artigos, por isso em vez de especificar um URL estático `/`, nos podemos também utilizar o ajudante Handlebars. O resultado final será o mesmo, mas esta abordagem dá-nos mais flexibilidade dado que o ajudante irá sempre fazer output do URL correcto mesmo que o caminho no roteador seja alterado.
+Queremos que o nosso link principal de casa aponte para a lista de artigos, por isso em vez de especificar um URL estático `/`, nos podemos também utilizar o ajudante Handlebars. O resultado final será o mesmo, mas esta abordagem dá-nos mais flexibilidade dado que o ajudante irá sempre fazer output do URL correto mesmo que o caminho no roteador seja alterado.
 
 ~~~html
 <header class="navbar">
@@ -141,9 +141,9 @@ Queremos que o nosso link principal de casa aponte para a lista de artigos, por 
 
 ### Esperando por Dados
 
-Caso publique a versão actual da aplicação (ou lance uma instância utilizando o link acima), irá notar que a lista aparece vazia por uns momentos antes dos artigos aparecerem. Isto é proque quando a página primeiro carrega, não existem artigos para mostrar enquanto a subscrição dos `posts` não carrega os dados dos artigos do servidor.
+Caso publique a versão atual da aplicação (ou lance uma instância utilizando o link acima), irá notar que a lista aparece vazia por uns momentos antes dos artigos aparecerem. Isto é porque quando a página primeiro carrega, não existem artigos para mostrar enquanto a subscrição dos `posts` não carrega os dados dos artigos do servidor.
 
-Seria muito melhor para a experiência de utilização se pudessemos disponibilizar algum feedback visual que algo está a acontecer, e que o utilizar deve esperar alguns momentos.
+Seria muito melhor para a experiência de utilização se pudéssemos disponibilizar algum feedback visual que algo está a acontecer, e que o utilizar deve esperar alguns momentos.
 
 Por sorte, o Iron Router tem uma forma fácil de fazer isso -- vamos `waitOn` (esperar pela) subscrição:
 
@@ -190,13 +190,13 @@ Note que `{{>spinner}}` é um template parcial contido no pacote `spin`. Apesar 
 
 Reatividade é um conceito chave de Meteor, e apesar de ainda não termos realmente abordado o tópico, o nosso template de carregamento dá-nos um primeiro olhar sobre este conceito.
 
-Redirecionar para um template de carregamente se os dados ainda não foram carregados está muito bem, mas como é que o roteador sabe quando deve redirecionar o utilizador *de volta* para a página correcta assim que os dados foram carregados?
+Redirecionar para um template de carregamento se os dados ainda não foram carregados está muito bem, mas como é que o roteador sabe quando deve redirecionar o utilizador *de volta* para a página correta assim que os dados foram carregados?
 
-Por agora, vamos apenas dizer que isto é exactamente onde a reatividade entra, e ficar por aqui. Mas não se preocuope, vai aprender mais sobre o assunto brevemente!
+Por agora, vamos apenas dizer que isto é exatamente onde a reatividade entra, e ficar por aqui. Mas não se preocupe, vai aprender mais sobre o assunto brevemente!
 
 <% end %>
 
-### Routeando Para Um Post Específico
+### Roteando Para Um Post Específico
 
 Agora que vimos como rotear para o template `postsList`, vamos criar uma rota para mostrar os detalhes de um único artigo.
 
@@ -228,11 +228,11 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "4~6" %>
 
-A sintaxe especial `:_id` indica ao roteador duas coisas: primeiro, para combinar qualquer rota na forma `/posts/xyz/`, onde "xyz" pode ser qualquer coisa. Segunda, para por seja o que for que encontrar neste "xyz" dentro de uma propriedade `_id` na lista `params` do roteador.
+A sintaxe especial `:_id` indica ao roteador duas coisas: primeiro, para combinar qualquer rota na forma `/posts/xyz/`, onde "xyz" pode ser qualquer coisa. Segundo, para por seja o que for que encontrar neste "xyz" dentro de uma propriedade `_id` na lista `params` do roteador.
 
-Note que estamos apenas a usar `_id` por uma questão de conveniencia. O roteador não ter forma de saber se você lhe está a passar realmente um `_id`, ou uma string aleatória de caracteres.
+Note que estamos apenas a usar `_id` por uma questão de conveniencia. O roteador não tem forma de saber se você lhe está a passar realmente um `_id`, ou uma string aleatória de caracteres.
 
-Estamos agora a rotear para o template correcto, mas ainda nos falta alguma coisa: o roteador sabe o `_id` do artigo que queremos mostrar, mas o template não faz ideia de qual é. Então, como é que davamos a volta a este problema?
+Estamos agora a rotear para o template correto, mas ainda nos falta alguma coisa: o roteador sabe o `_id` do artigo que queremos mostrar, mas o template não faz ideia de qual é. Então, como é que damos a volta a este problema?
 
 Felizmente, o roteador tem uma solução inteligente: este deixa especificar o **contexto de dados** do template. Pode-se pensar no contexto de dados como o recheio dentro de um bolo delicioso feito de templates e layouts. De forma simples, é o que se usa para encher o template:
 
@@ -260,11 +260,11 @@ Dentro da função `data` (dados em português) para uma rota, `this` correspond
 
 <% note do %>
 
-### Mais Sobre Contexo de Dados
+### Mais Sobre Contexto de Dados
 
 Ao definir o *contexto de dados* de um template, pode controlar o valor de `this` dentro de um ajudante de template.
 
-Isto é normalmente feito implicitamente com o iterador `{{#each}}`, que automáticamente define o contexo de dados de cada iteração para o item atual da interação:
+Isto é normalmente feito implicitamente com o iterador `{{#each}}`, que automaticamente define o contexo de dados de cada iteração para o item atual da interação:
 
 ~~~html
 {{#each widgets}}
@@ -272,7 +272,7 @@ Isto é normalmente feito implicitamente com o iterador `{{#each}}`, que automá
 {{/each}}
 ~~~
 
-Mas também o podemos fazer explicitament utilizando `{{#with}}`, que simplesmente diz "toma este objecto, e aplica-lhe este template". Por exemplo, podemos escrever:
+Mas também o podemos fazer explicitamente utilizando `{{#with}}`, que simplesmente diz "toma este objecto, e aplica-lhe este template". Por exemplo, podemos escrever:
 
 ~~~html
 {{#with myWidget}}
@@ -280,7 +280,7 @@ Mas também o podemos fazer explicitament utilizando `{{#with}}`, que simplesmen
 {{/with}}
 ~~~
 
-Também é possível obter o mesmo efeito passando o contexto como um *argumento* da chamada ao template. Ou seja, o bloco anterior de código pode ser re-escrito como:
+Também é possível obter o mesmo efeito passando o contexto como um *argumento* da chamada ao template. Ou seja, o bloco anterior de código pode ser reescrito como:
 
 ~~~js
 {{> widgetPage myWidget}}
@@ -288,9 +288,9 @@ Também é possível obter o mesmo efeito passando o contexto como um *argumento
 
 <% end %>
 
-### Utilizando Um Ajudante de Routeador Com Nome Dinâmico
+### Utilizando Um Ajudante de Roteador Com Nome Dinâmico
 
-Por fim, temos de ter a certeza que estamos a apontar para o lugar certo quando queremos fazer um link para um artigo indivídual. Novamente, podemos usar algo como `<a href="/posts/{{_id}}">`, mas usar um ajudante de roteador é mais seguro.
+Por fim, temos de ter a certeza que estamos a apontar para o lugar certo quando queremos fazer um link para um artigo individual. Novamente, podemos usar algo como `<a href="/posts/{{_id}}">`, mas usar um ajudante de roteador é mais seguro.
 
 Chamámos a rota do artigo `postPage`, por isso podemos usar um ajudante `{{pathFor 'postPage'}}`:
 
@@ -308,13 +308,13 @@ Chamámos a rota do artigo `postPage`, por isso podemos usar um ajudante `{{path
 <%= highlight "6" %>
 <%= commit "5-3", "Rotear para uma única página de artigo." %>
 
-Mas espera, como exactamente é que o roteador sabe onde ir buscar a parte do xyz em `/posts/xyz`? No final de contas, não lhe estamos a passar nenhum `_id`.
+Mas espera, como exatamente é que o roteador sabe onde ir buscar a parte do `xyz` em `/posts/xyz`? No final de contas, não lhe estamos a passar nenhum `_id`.
 
-Na realidade, o Iron Router é suficientemente inteligente para perceber isso por si próprio. Nós estamos a dizer ao roteador para usar a rota `postPage`, e o roteador sabe que esta rota precisa de um `_id` de alguam espécie (dado que foi assim que definimos a nossa `path`) .
+Na realidade, o Iron Router é suficientemente inteligente para perceber isso por si próprio. Nós estamos a dizer ao roteador para usar a rota `postPage`, e o roteador sabe que esta rota precisa de um `_id` de alguma espécie (dado que foi assim que definimos a nossa `path`) .
 
 Assim, o roteador vai procurar por este `_id` no local mais lógico disponível: o contexto de dados do ajudante `{{pathFor 'postPage'}}`, ou notras palavras `this`. E acontece que o nosso `this` corresponde a um artigo, que (surpresa!) tem uma propriedade `_id`.
 
-Alternativamente, também é possível dizer explicitamente ao roteador onde é que ele deve procurar pela propriedade `_id`, passando um segundo arguemnto ao ajudante (ou seja, `{{pathFor 'postPage' someOtherPost}}`). Um possível cenário onde este padrão poderá ser usado é ao construir o link para o artigo anterior ou seguinte numa lista.
+Alternativamente, também é possível dizer explicitamente ao roteador onde é que ele deve procurar pela propriedade `_id`, passando um segundo argumento ao ajudante (ou seja, `{{pathFor 'postPage' someOtherPost}}`). Um possível cenário onde este padrão poderá ser usado é ao construir o link para o artigo anterior ou seguinte numa lista.
 
 Para verificar se funciona corretamente, navegue para a lista de artigos e clique num dos links `Discuss`. Deve ver algo como:
 
@@ -326,7 +326,7 @@ Para verificar se funciona corretamente, navegue para a lista de artigos e cliqu
 
 Uma coisa a perceber é que estas mudanças de URL estão a ser feitas utilizando [HTML5 pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history?redirectlocale=en-US&redirectslug=Web%2FGuide%2FDOM%2FManipulating_the_browser_history).
 
-O Routeador apanha cliques em URLs que são internos ao site, e evita que o navegador navega para fora da aplicação, e em vez disso faz as alterações necessárias ao estado da aplicação.
+O Roteador apanha cliques em URLs que são internos ao site, e evita que o navegador navegue para fora da aplicação, e em vez disso faz as alterações necessárias ao estado da aplicação.
 
 Se tudo funcionar corretamente, a página deve mudar de forma instantânea. De facto, às vezes as coisas mudam tão rápido que pode ser necessária uma transição de página. Isto está fora do ambito deste capítulo, mas não deixa de ser um tópico interessante.
 
