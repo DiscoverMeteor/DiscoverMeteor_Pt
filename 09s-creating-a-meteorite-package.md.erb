@@ -8,11 +8,11 @@ contents: Escreva um pacote local para sua aplicação.|Escreva alguns testes pa
 paragraphs: 22
 ---
 
-////
+Nós construímos um padrão re-utilizável com o nosso trabalho com erros, então porque não envovê-lo num pacote inteligente e compartilhá-lo com o resto da comunidade Meteor?
 
-////
+Primeiro nós precisamos criar alguma estrutura para o nosso pacote residir. Nós pomos o pacote num diretório chamado `packages/errors`. Isto cria um pacote personalizado que é automaticamente utilizado. (Você pode ter notado que o Meteorite instala pacotes através de symlinks no diretório `packages/`).
 
-////
+Segundo, nós criaremos `package.js` nessa pasta, o arquivo que informa ao Meteor como o pacote deve ser utilizado, e os símbolos que ele exporta.
 
 ~~~js
 Package.describe({
@@ -23,20 +23,20 @@ Package.on_use(function (api, where) {
   api.use(['minimongo', 'mongo-livedata', 'templating'], 'client');
 
   api.add_files(['errors.js', 'errors_list.html', 'errors_list.js'], 'client');
-
-  if (api.export)
+  
+  if (api.export) 
     api.export('Errors');
 });
 ~~~
 <%= caption "packages/errors/package.js" %>
 
-////
+Vamos adicionar três arquivos ao pacote. Nós podemos puxar esses arquivos do Microscopoe sem muita mudança exceto por algum namespacing apropriado e uma API ligeiramente mais limpa:
 
 ~~~js
 Errors = {
   // Local (client-only) collection
   collection: new Meteor.Collection(null),
-
+  
   throw: function(message) {
     Errors.collection.insert({message: message, seen: false})
   },
@@ -80,9 +80,9 @@ Template.meteorError.rendered = function() {
 ~~~
 <%= caption "packages/errors/errors_list.js" %>
 
-### Testing the package out with Microscope
+### Testando o pacote com Microscope
 
-////
+Agora nós testaremos as coisas localmente com Microscope para assegurar que o nosso código modificado funcione. Para ligar o pacote ao nosso projeto, nós rodamos `meteor add errors`. Então, nós precisamos deletar os arquivos existentes que se tornaram redudantes devido ao novo pacote:
 
 ~~~bash
 $ rm client/helpers/errors.js
@@ -91,7 +91,7 @@ $ rm client/views/includes/errors.js
 ~~~
 <%= caption "removing old files on the bash console" %>
 
-////
+Uma outra coisa que nós precisamos fazer é algumas pequenas atualizações para utilizar a API correta:
 
 ~~~js
 Router.before(function() { Errors.clearSeen(); });
@@ -123,39 +123,39 @@ Posts.update(currentPostId, {$set: postProperties}, function(error) {
 
 <%= scommit "9-5-1", "Created basic errors package and linked it in." %>
 
-////
+Uma vez que essas mudanças forem feitas, nós devemos ter nosso comportamento original pré-pacote de volta.
 
-### Writing tests
+### Escrevendo testes
 
-////
+O primeiro passo em desenvolver um pacote é testá-lo num aplicativo, mas o próximo é escrever um grupo de teste que testa propriamente o comportamento do pacote. O Meteor em si vem com Tinytest (pacote nativo de testagem), que torna fácil rodar tais testes e manter a paz espiritual ao compartilhar nosso pacote com outros.
 
-////
+Vamos criar um arquivo de teste que usa Tinytest para rodar alguns testes contra a nossa base de código para errors:
 
 ~~~js
 Tinytest.add("Errors collection works", function(test) {
   test.equal(Errors.collection.find({}).count(), 0);
-
+  
   Errors.throw('A new error!');
   test.equal(Errors.collection.find({}).count(), 1);
-
+  
   Errors.collection.remove({});
 });
 
-Tinytest.addAsync("Errors template works", function(test, done) {
+Tinytest.addAsync("Errors template works", function(test, done) {  
   Errors.throw('A new error!');
   test.equal(Errors.collection.find({seen: false}).count(), 1);
-
+  
   // render the template
   OnscreenDiv(Spark.render(function() {
     return Template.meteorErrors();
   }));
-
+  
   // wait a few milliseconds
   Meteor.setTimeout(function() {
     test.equal(Errors.collection.find({seen: false}).count(), 0);
     test.equal(Errors.collection.find({}).count(), 1);
     Errors.clearSeen();
-
+    
     test.equal(Errors.collection.find({seen: true}).count(), 0);
     done();
   }, 500);
@@ -163,17 +163,17 @@ Tinytest.addAsync("Errors template works", function(test, done) {
 ~~~
 <%= caption "packages/errors/errors_tests.js" %>
 
-////
+Nesses testes nós estamos checando se as funções básicas de `Meteor.Errors` estão funcionando, assim como checando duas vezes que o código `rendered` no template ainda está funcionando.
 
-////
+Nós não cobriremos as especificidades de se escrever testes para pacotes Meteor aqui (já que a API não está finalizada e sim em alto fluxo), mas felizmente é bem auto-explicativo como funciona.
 
-////
+Para dizer ao Meteor como rodar os teste em `package.js`, use o código seguinte:
 
 ~~~js
 Package.on_test(function(api) {
   api.use('errors', 'client');
-  api.use(['tinytest', 'test-helpers'], 'client');
-
+  api.use(['tinytest', 'test-helpers'], 'client');  
+  
   api.add_files('errors_tests.js', 'client');
 });
 ~~~
@@ -181,7 +181,7 @@ Package.on_test(function(api) {
 
 <%= scommit "9-5-2", "Added tests to the package." %>
 
-////
+Então nós podemos rodar os testes com:
 
 ~~~bash
 $ meteor test-packages errors
@@ -190,11 +190,11 @@ $ meteor test-packages errors
 
 <%= screenshot "s7-1", "Passing all tests" %>
 
-### Releasing the package
+### Lançando o pacote
 
-////
+Agora, nós queremos lançar o pacote e torná-lo disponível para o mundo. Nós fazemos isso pondo-o em Atmosphere.
 
-////
+Primeiro, nós precisamos adicionar um `smart.json`, para dizer ao Meteorite e Atmosphere os detalhes importantes do pacote:
 
 ~~~json
 {
@@ -212,11 +212,11 @@ $ meteor test-packages errors
 
 <%= scommit "9-5-3", "Added a smart.json" %>
 
-////
+Nós pomos alguma meta-informação básica para prover informação sobre o pacote, incluindo o que ele faz, a localização git onde nós vamos hospedá-lo, e um número inicial de versão. Se nosso pacote necessita de outros pacotes Atmosphere, nós também podemos utilizar o segmento `"pacotes"` para informar as dependências.
 
-////
+Uma vez que tudo isto esteja no lugar, lançar é fácil. Nós precisaremos criar um repositório git, empurrar a um servidor git remote em algum lugar, e linkar para essa localização no nosso `smart.json`.
 
-////
+O processo de fazer isso para o [GitHub](http://github.com) é primeiro criar um novo repositório, então seguir a prática padrão para pegar o código do pacote de dentro do repositório. Então, nós usamos o comando `mrt release` para publicá-lo:
 
 ~~~bash
 $ git init
@@ -229,11 +229,11 @@ Done!
 ~~~
 <%= caption "Terminal (run from within `packages/errors`)" %>
 
-////
+Note: nome de pacotes devem ser únicos. Se você está seguindo palavra-por-palavra e usar o mesmo nome de pacote, haverá um conflito e não funcionará. No futuro a Atmosphere separará os pacotes com nome de autor, então você pode esperar que isso mude.
 
-////
+Outra coisa: Você precisará logar em http://atmosphere.meteor.com e criar um username e senha com os quais você entrará na linha de comando quando você chamar `mrt release .`.
 
-////
+Agora que o pacote foi lançado, nós podemos deletá-lo do nosso projeto e então adicioná-lo de volta diretamente usando Meteorite:
 
 ~~~bash
 $ rm -r packages/errors
@@ -243,4 +243,4 @@ $ mrt add errors
 
 <%= scommit "9-5-4", "Removed package from development tree." %>
 
-////
+Agora nós devemos ver o Meteorite fazer download do nosso pacote pela primeira vez. Parabéns!
