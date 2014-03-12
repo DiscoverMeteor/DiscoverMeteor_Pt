@@ -7,15 +7,15 @@ contents: Aprenda sobre a principal característica do Meteor, coleções em tem
 paragraphs: 72
 ---
 
-////
+No primeiro capítulo nós falamos sobre a principal característica do Meteor, a sincronização automatica de dados entre cliente e servidor.
 
-////
+Nesse capítulo nós vamos olhar de perto como isso funciona e observar a principal peça de tecnologia que permite isso, Coleções do Meteor.
 
-////
+Nós estamos construindo uma aplicação de rede social de notícias, então a primeira coisa que queremos fazer é uma lista de links que pessoas postaram. Nós vamos chamar cada um desses itens de "artigo".
 
-////
+Naturalmente, nós precisamos guardar esses artigos em algum lugar. O Meteor vem com o banco de dados MongoDB integrado, ele roda em seu servidor e guarda dados *persistentes*.
 
-////
+Então, apesar do browser/navegador do usuário poder conter algum tipo de estado(por exemplo que página ele está ou o commentário que está digitando), o servidor, especificamente o MongoDB, contém os dados permanentes e canonicais. Por *canonical* nos referimos que é o mesmo para todos usuários, cada usuário pode estar em uma página diferente, mas a lista principal de artigos é a mesma para todos.
 
 ////
 
