@@ -8,43 +8,43 @@ contents: Entenda o que é desnormalização.|Compare MongoDB com o tradicional 
 paragraphs: 15
 ---
 
-////
+Desnormalizar a informação significa não armazená-la de forma "normal". Em outras palavras, desnormalização significa ter múltiplas cópias do mesmo pedaço de informação por aí.
 
-////
+No último capítulo, nós desnormalizamos a contagem do número de comentários no objeto post para evitar ter de ler todos os comentários o tempo todo. Num sentido de modelagem da informação isto é redundante, já que nós podíamos apenas contar o conjunto correto de comentário a qualquer momento para descobrir o valor (deixando de lado considerações quanto à performance).
 
-////
+Desnormalização geralmente significa trabalho extra para o desenvolvedor. No nosso exemplo, cada vez que nós adicionamos ou removemos um comentário nós também precisamos nos lembrar de atualizar o artigo relevante para assegurar que o campo `commentsCount` continue correto. Isto é exatamente o porquê de bancos de dados relacionais como MySQL franzirem as sobrancelhas para isto tipo de procedimento.
 
-////
+Entretanto, o procedimento normal também tem suas desvantagens: sem uma propriedade `commentsCount`, nós precisaríamos mandar _todos_ os comentários pela fiação todas as vezes apenas para sermos capazes de contá-los, o que era o que estávamos fazendo no início. Desnormalizar nos permite evitar isso completamente.
 
 <% note do %>
 
-### A Special Publication
+### Uma Publicação Especial
 
-////
+*Seria* possível criar uma publicação especial que enviaria apenas a contagem de comentários que nós estamos interessados (vulgo a contagem de comentários de artigos que nós atualmente vemos, através de consultas agregadas no servidor).
 
-////
+Mas é válido considerar se a complexidade de tal código de publicação não pesa mais que as dificuldades criadas por desnormalizar...
 
 <% end %>
 
-////
+Claro, tais considerações devem ser específicas ao aplicativo: se você está escrevendo um código onde a integridade da informação é de suma importância, então evitar inconsistências na informação é bem mais importante e de uma ordem de prioridade maior para você do que ganhos de performance.
 
-### Embedding Documents or Using Multiple Collections
+### Embutindo Documentos ou Criando Coleções Múltiplas
 
-////
+Se você é experiente em Mongo, você pode ter se surpreendido ao ver que nós criamos uma segunda coleção apenas para os comentários: por que não apenas imbutí-los numa lista dentro do documento artigo?
 
-////
+A questão é que várias das ferramentas que o Meteor dá funcionam bem melhor quando se opera ao nível da coleção. Por exemplo:
 
-1. ////
-2. ////
-3. ////
-4. ////
+1. O ajudante `{{#each}}` é bem eficiente quando interando sobre um cursor (o resultado de `collection.find()`). O mesmo é verdadeiro quando ele intera sobre um array de objetos dentro de um documento maior.
+2. `allow` e `deny` operam no nível do documento, e então torna mais fácil assegurar que qualquer modificações em comentários individuais estão corretas de uma forma que seria mais complexa se nós operassemos no nível do artigo.
+3. DDP opera ao nível de atributos de nível superior do documento--isto significa se `comments` fosse uma propriedade do `post`, cada vez que um comentário fosse criado no artigo, o servidor enviaria a lista de comentários inteira atualizada do artigo para cada cliente conectado.
+4. Publicações e assinaturas são bem mais fáceis de controlar no nível dos documentos. Por exemplo, se nós quisermos paginar os comentários do artigo seria difícil a não ser que os comentários estivessem em sua própria coleção.
 
-////
+Mongo sugere documentos embutidos para reduzir o número de consultas despendiosas para pegar documentos. Entretanto, isto não é tanto a questão quando se leva em consideração a arquitetura do Meteor: a maior parte do tempo nós estamos consultando comentários no *cliente*, onde o acesso ao banco de dados é essencialmente livre.
 
 <% note do %>
 
-### The Downsides of Denormalization
+### As Desvantagens da Desnormalização
 
-////
+Há um bom argumento a ser feito sobre porque *não devemos* desnormalizar nossa informação. Para uma boa olhada sobre o caso contra a desnormalização, nós recomendamos [Why You Should Never Use MongoDB](http://www.sarahmei.com/blog/2013/11/11/why-you-should-never-use-mongodb/) por Sarah Mei.
 
 <% end %>
