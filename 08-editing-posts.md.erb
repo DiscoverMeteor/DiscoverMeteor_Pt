@@ -7,9 +7,9 @@ contents: Adicione um formulário par editar seus artigos.|Criar edição de per
 paragraphs: 29
 ---
 
-////
+Agora que já conseguimos criar artigos, o próximo passo é conseguir edita-los e remove-los. Dado que o código de UI desta funcionalidade é bastante simples, esta é uma boa altura para falar sobre como Meteor gere permissões de utilizadores.
 
-////
+Vamos primeiro configurar o nosso roteador. Primeiro vamos adicionar uma rota para aceder à página de edição do artigo e vamos definir o seu contexto de dados:
 
 ~~~js
 Router.configure({
@@ -40,7 +40,7 @@ var requireLogin = function() {
       this.render('loading')
     else
       this.render('accessDenied');
-
+  
     this.stop();
   }
 }
@@ -50,9 +50,9 @@ Router.before(requireLogin, {only: 'postSubmit'});
 <%= caption "lib/router.js" %>
 <%= highlight "12~15" %>
 
-### The Post Edit Template
+### O Template De Edição de Artigos
 
-////
+Podemo-nos focar agora no template. O nosso template `postEdit` vai ser um formulário standard:
 
 ~~~html
 <template name="postEdit">
@@ -87,20 +87,20 @@ Router.before(requireLogin, {only: 'postSubmit'});
 ~~~
 <%= caption "client/views/posts/post_edit.html" %>
 
-////
+E aqui está o gestor `post_edit.js` que acompanha o template:
 
 ~~~js
 Template.postEdit.events({
   'submit form': function(e) {
     e.preventDefault();
-
+    
     var currentPostId = this._id;
-
+    
     var postProperties = {
       url: $(e.target).find('[name=url]').val(),
       title: $(e.target).find('[name=title]').val()
     }
-
+    
     Posts.update(currentPostId, {$set: postProperties}, function(error) {
       if (error) {
         // display the error to the user
@@ -110,10 +110,10 @@ Template.postEdit.events({
       }
     });
   },
-
+  
   'click .delete': function(e) {
     e.preventDefault();
-
+    
     if (confirm("Delete this post?")) {
       var currentPostId = this._id;
       Posts.remove(currentPostId);
@@ -124,19 +124,19 @@ Template.postEdit.events({
 ~~~
 <%= caption "client/views/posts/post_edit.js" %>
 
-////
+Por esta altura a maioria do código deve parecer familiar. Primeiro, temos o nosso ajudante de template que carrega o artigo atual e passa-o ao template.
 
-////
+Depois, temos duas callbacks de eventos do template: uma para o evento `submit` (submeter) do formulário, e outra para o `click` no link de apagar.
 
-////
+A callback do apagar é muito simples: suprimir o evento de click por omissão, e pedir ao utilizador para confirmar. Caso isso aconteça, obtém o ID do artigo atual do contexto de dados do Template, apaga o artigo, e finalmente redireciona o utilizador para a página inicial.
 
-////
+A callback de edição é ligeiramente maior, mas não muito mais complicada. Depois de suprimir o evento por omissão e de ir buscar o artigo atual, lemos os novos valores dos campos do formulário da página e guardamo-los num objecto `postProperties` (propriedades do artigo).
 
-////
+Depois passamos este objecto para o Método de Meteor `Collection.update()`, e utilizamos a callback que ou mostra um erro se a atualização falhou, ou envia o utilizador de volta para a página do artigo caso a atualização tenha sido feita com sucesso.
 
-### Adding Links
+### Adicionando Links
 
-////
+Devemos ainda adicionar links de edição aos nossos artigos para que os utilizadores tenham uma forma de aceder à página de edição de artigos:
 
 ~~~html
 <template name="postItem">
@@ -155,7 +155,7 @@ Template.postEdit.events({
 <%= caption "client/views/posts/post_item.html" %>
 <%= highlight "5~8" %>
 
-////
+Naturalmente, não queremos mostrar links de edição para o formulário de outra pessoa. É aqui que o ajudante `ownPost` entra:
 
 ~~~js
 Template.postItem.helpers({
@@ -172,17 +172,17 @@ Template.postItem.helpers({
 <%= caption "client/views/posts/post_item.js" %>
 <%= highlight "2~4" %>
 
-<%= screenshot "8-1", "Post edit form." %>
+<%= screenshot "8-1", "Formulário de edição de artigo." %>
 
-<%= commit "8-1", "Added edit posts form." %>
+<%= commit "8-1", "Formulário de edição de artigos adicionado." %>
 
-////
+O nosso formulário de edição de artigos está com bom aspeto, mas ainda não é possível editar nada. O que é que se passa?
 
-### Setting Up Permissions
+### Definindo Permissões
 
-////
+Dado que anteriormente removemos o pacote `insecure`, todas as modificações feitas do lado do cliente estão a ser recusadas.
 
-////
+Para corrigir isto, vamos definir alguma regras de permissões. Primeiro, crie um novo ficheiro `permissions.js` dentro de `lib`. Isto faz com que a nossa lógica de permissões seja carregada primeiro (e que esteja disponível em ambos os ambientes):
 
 ~~~js
 // check that the userId specified owns the documents
@@ -192,9 +192,9 @@ ownsDocument = function(userId, doc) {
 ~~~
 <%= caption "lib/permissions.js" %>
 
-////
+No capitulo [Criando Artigos](/chapter/creating-posts), nós vimo-nos livres dos Métodos `allow()` porque estávamos apenas a inserir novos artigos através de um Método de servidor (que de qualquer forma, ignora o `allow()`).
 
-////
+Mas agora que estamos a atualizar e apagar artigos a partir do cliente, vamos voltar ao `posts.js` e adicionar este bloco `allow()`:
 
 ~~~js
 Posts = new Meteor.Collection('posts');
@@ -210,13 +210,13 @@ Meteor.methods({
 <%= caption "collections/posts.js" %>
 <%= highlight "3~6" %>
 
-<%= commit "8-2", "Added basic permission to check the post's owner." %>
+<%= commit "8-2", "Permissão básica que verifica o dono do artigo adicionada." %>
 
-### Limiting Edits
+### Limitando Edições
 
-////
+Só porque pode editar os seus próprios artigos, não quer dizer que deva poder editar *qualquer* propriedade. Por exemplo, nós não queremos que os utilizadores sejam capazes de criar um artigo e depois associá-lo a outro utilizador.
 
-////
+A callback `deny()` do Meteor é utilizada para garantir que apenas campos específicos podem ser atualizados:
 
 ~~~js
 Posts = new Meteor.Collection('posts');
@@ -236,31 +236,30 @@ Posts.deny({
 <%= caption "collections/posts.js" %>
 <%= highlight "8~13" %>
 
-<%= commit "8-3", "Only allow changing certain fields of posts." %>
+<%= commit "8-3", "Permitir que apenas certos campos do artigo possam ser alterados." %>
 
-////
+Estamos a pegar na lista `fieldNames` que contém os campos a serem modificados e usamos o Método `without()` do [Underscore](http://underscorejs.org/) para devolver uma sub-lista contendo apenas os campos que *não* são `url` ou `title`.
 
-////
+Se tudo está normal, essa lista deve estar vazia e o seu tamanho deve ser 0. Se alguem está a tentar alguma coisa manhosa, o tamanho dessa lista será 1 ou mais, e a callback vai devolver `true` (impedindo assim a atualização).
 
 <% note do %>
 
-### Method Calls vs Client-side Data Manipulation
+### Chamadas a Métodos vs Manipulação de Dados No Lado do Cliente
 
-////
+Para criar artigos, estamos a utilizar o Método `post`, enquanto que para os editar e apagar, estamos a chamar `update` e `remove` diretamente no cliente e limitamos o acesso usando `allow` e `deny`.
 
-////
+Quando é adequado usar um e não o outro?
 
-////
+Quando as coisas são relativamente simples e as regras podem ser exprimidas por `allow` e `deny`, é normalmente mais simples fazer as coisas diretamente no cliente.
 
-////
+Manipular a base de dados diretamente a partir do cliente cria uma percepção de imediato, e pode fazer com que a experiência de utilização seja melhor desde que os casos de erro sejam tratados adequadamente (isto é, quando o servidor responde dizendo que a operação afinal falhou).
 
-////
+No entanto, a partir do momento em que é necessário fazer coisas que devem estar fora do controlo do utilizador (tais como dar timestamps a novos artigos ou associar um artigo ao utilizador correto), é provavelmente melhor usar um Método.
 
-////
+Chamadas a Métodos também são mais adequadas em alguns outros casos:
 
-- ////
-- ////
-- ////
+- Quando é preciso saber ou é preciso devolver valores através de uma callback em vez de esperar que a reatividade e sincronização propaguem as alterações.
+- Para operações de base de dados pesadas que implicariam enviar uma coleção grande para o cliente.
+- Para sumarizar ou agregar dados (por exemplo, contar, médias, somas).
 
 <% end %>
-
