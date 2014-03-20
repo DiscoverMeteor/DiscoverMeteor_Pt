@@ -8,20 +8,20 @@ contents: Aprenda como criar fontes de dados reativo no Meteor.|Crie um exemplo 
 paragraphs: 29
 ---
 
-////
+É raro você mesmo precisar escrever código para rastrear dependências, mas é certamente útil entendê-lo para traçar como funciona o caminho do fluxo de resolução.
 
-////
+Imagine que nós gostaríamos de rastrear quantos amigos de Facebook do usuário logado "gostaram" de cada artigo no Microscope. Vamos supor que nós já resolvemos os detalhes de como autenticar o usuário com Facebook, fazer as chamadas à API apropriadas, e análise da informação relevante. Nós agora temos uma função assíncrona do lado do cliente que retorna o número de likes, `getFacebookLikeCount(user, url, callback)`.
 
-////
+A coisa importante a se lembrar sobre tal função é que ela é bastante *não reativa* e não em tempo real. Ela fará um pedido HTTP ao Facebook, trará alguma informação, e a fará disponível à aplicação num callback assíncrono, mas a função não re-rodará sozinha quando a contagem mudar no Facebook, e nossa UI não mudará quando a informação subjacente mudar.
 
-////
+Para consertar isso, nós podemos começar por usar `setInterval` para chamar nossa função a cada alguns segundos:
 
 ~~~js
 currentLikeCount = 0;
 Meteor.setInterval(function() {
   var postId;
   if (Meteor.user() && postId = Session.get('currentPostId')) {
-    getFacebookLikeCount(Meteor.user(), Posts.find(postId),
+    getFacebookLikeCount(Meteor.user(), Posts.find(postId), 
       function(err, count) {
         if (!err)
           currentLikeCount = count;
@@ -30,7 +30,7 @@ Meteor.setInterval(function() {
 }, 5 * 1000);
 ~~~
 
-////
+A qualquer momento que nós checarmos a variável `currentLikeCount`, nós podemos esperar o número correto com uma margem de erro de 5 segundos. Nós podemos agora usar esta variável num ajudante assim:
 
 ~~~js
 Template.postItem.likeCount = function() {
@@ -38,19 +38,19 @@ Template.postItem.likeCount = function() {
 }
 ~~~
 
-////
+Entretanto, nada ainda diz ao nosso template para re-desenhar quando `currentLikeCount` mudar. Apesar da variável ser agora pseudo-em tempo real já que ela muda sozinha, ela não é *reativa* então ela ainda não consegue se comunicar devidamente com o resto do ecosistema do Meteor.
 
-### Tracking Reactivity: Computations
+### Rastreando Reatividade: Computações
 
-////
+A reatividade do Meteor é mediada por *dependências*, estruturas de informação que rastreiam um conjunto de computações.
 
-////
+Como nós vimos anteriormente na barra lateral reatividade, uma computação é um segmento do código que usa informação reativa. No nosso caso, há uma computação que está sendo criada implicitamente pelo template `postItem`. Cada ajudante no administrador desse template está trabalhando dentro da computação.
 
-////
+Você pode pensar na computação como o segmento de código que "se importa" quanto à informação reativa. Quando a informação muda, esta será a computação que será informada (via `invalidate()`), e é a computação que decide quando algo precisa ser feito.
 
-### Turning a Variable Into a Reactive Function
+### Transformando uma Variável em uma Função Reativa
 
-////
+Para tornar nossa variável `currentLikeCount` em uma fonte de informação reativa, nós precisamos rastrear todas as computações que a utilizam em uma dependência. Isto requer mudá-la de uma variável em uma função (que retornará um valor):
 
 ~~~js
 var _currentLikeCount = 0;
@@ -64,7 +64,7 @@ currentLikeCount = function() {
 Meteor.setInterval(function() {
   var postId;
   if (Meteor.user() && postId = Session.get('currentPostId')) {
-    getFacebookLikeCount(Meteor.user(), Posts.find(postId),
+    getFacebookLikeCount(Meteor.user(), Posts.find(postId), 
       function(err, count) {
         if (!err && count !== _currentLikeCount) {
           _currentLikeCount = count;
@@ -76,37 +76,37 @@ Meteor.setInterval(function() {
 ~~~
 <%= highlight "1~7,14~17" %>
 
-////
+O que nós fizemos foi configurar uma dependência `_currentLikeCountListerners`, a qual rastreia todas as computações dentro das quais `currentLinkCount()` foi utilizada. Quando o valor de `_currentLikeCount` muda, nós chamamos a função `changed()` nesta dependência, a qual invalida todas as computações rastreadas.
 
-////
+Essas computações podem então ir em frente e lidarem com a mudança caso a caso. Neste caso da computação do template, parece que o template re-desenha a si mesmo.
 
-### Template Computation and Controlling Redraws
+### Computação de Template e Controlando o Redesenhar
 
-////
+A razão de porque cada template tem sua própria computação é para controlar a quantidade de redesenhar que ocorre na tela.
 
-////
+Quando nós chamamos um template de dentro de outro, nós estamos estabelecendo uma segunda computação dentro da primeira. Então quando a informação reativa do template interior muda, este template interior é redesenhado porém o template *exterior* continua intacto. Desta forma, computações são utilizadas para controlar o escopo das mundanças reativas.
 
-////
+O Meteor também nos dá um pouco de ajuda extra para melhorar os mecanismos básicos de aninhar templates.
 
-////
+Primeiro, o ajudante em bloco `{{#constant}}` *mata* a reatividade dentro de si. Então qualquer informação que é colhida pelos ajudantes dentro do bloco é apenas usada uma vez. E mesmo que o template exterior seja redesenhado, o HTML da área constante é deixado de lado já que seria renderizado de mesma exata forma. Isto faz das regiões constantes uma grande forma de adminsitrar widgets de terceiros que não estão esperando que o Meteor re-desenhe o DOM sob eles. 
 
-////
+O segundo utilitário que pode nos ajudar a controlar a reativiadde é o ajudante em bloco `{{#isolate}}`, o qual configura uma *nova* computação dentro de um template. Em outras palavras, tem o mesmo efeito de mover um segmento do template para dentro de um sub-template em termos de reatividade e redesenho.
 
-////
+Então se uma das fontes de informação reativa dentro do bloco isolate mudar, a área isolada será re-desenhada, mas o remanecescente do template superior não. Se o template superior re-desenhar porém, a área isolada será redesenhada também.
 
-### Comparing Deps to Angular
+### Comparando Deps a Angular
 
-////
+[Angular](http://angularjs.org/) é uma biblioteca de renderização reativa do lado do cliente apenas, desenvolvida pelo bom pessoal do Google. É interessante comparar o modo de rastrear dependências do Meteor e do Angular, já que os modos são bem diferentes.
 
-////
+Nós vimos que o modelo do Meteor usa blocos de códigos chamados computações. Essas computações são rastreadas por fontes de informações "reativas" (funções) que tratam de invalidá-las quando necessário. Então a fonte de informação _explicitamente_ informa todas as suas dependências quando eles precisam chamar `invalidate()`. Note que apesar que isso é geralmente quando informação muda, a fonte de informação poderia potencialmente decidir desencadear uma invalidação por outras razões.
 
-////
+Adicionalmente, apesar que computações usualmente apenas re-rodam quando invalidadas, você pode configurá-las para se comportar de qualquer forma que você quiser. 
 
-////
+Em Angular, a reatividade é mediada pelo objeto `scope`. Um escopo pode ser pensado como um objeto JavaScript comum com alguns métodos especiais.
 
-////
+Quando você quer reativamente depender em um valor em um escopo, você chama `scope.$watch`, providenciando a expressão que você está interessado (vulgo quais partes do escopo você se importa) e uma função ouvinte que rodará cada vez que a expressão mudar. Então você explicitamente afirma exatamente o que você quer que seja feito toda vez que o valor da expressão mudar.
 
-////
+Voltando ao nosso exemplo do Facebook, nós escreveríamos:
 
 ~~~js
 $rootScope.$watch('currentLikeCount', function(likeCount) {
@@ -114,17 +114,17 @@ $rootScope.$watch('currentLikeCount', function(likeCount) {
 });
 ~~~
 
-////
+Claro, assim como você raramente configura computações em Meteor, você não chama `$watch` explicitamente com freqüência em Angular pois diretivas `ng-model` e `{{expressions}}` automaticamente configuram watches que então cuidam de re-renderizarem quando há mudança.
 
-////
+Quando tal valor reativo mudar, `scope.$apply()` deve então ser chamado. Isto re-avalia cada observador do escopo, mas apenas chama a função ouvinte dos observadores dos quais o valor da expressão tenha *mudado*.
 
-////
+Então `scope.$apply()` é similar a `dependency.changed()`, exceto por agir no nível do escopo, ao invés de lhe dar o controle quanto a dizer precisamente quais ouvintes devem ser re-avaliados. Tendo dito isto, esta leve falta de controle dá a Angular a habilidade de ser bem inteligente e eficiente na forma como ele determina precisamente quais ouvintes precisam ser re-avaliados.
 
-////
+Com Angular, nosso código da função `getFacebookLikeCount()` se pareceria com algo assim:
 
 ~~~js
 Meteor.setInterval(function() {
-  getFacebookLikeCount(Meteor.user(), Posts.find(postId),
+  getFacebookLikeCount(Meteor.user(), Posts.find(postId), 
     function(err, count) {
       if (!err) {
         $rootScope.currentLikeCount = count;
@@ -135,4 +135,4 @@ Meteor.setInterval(function() {
 ~~~
 <%= highlight "5~6" %>
 
-////
+Admitidamente, o Meteor toma conta da maior parte do trabalho pesado para nós e nos deixa colher os benefícios da reatividade sem muito trabalho da nossa parte. Mas felizmente, aprender sobre esses padrões se mostrará útil se alguma vez precisarmos levar as coisas mais adiante.
