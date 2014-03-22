@@ -17,9 +17,9 @@ Naturalmente, nós precisamos guardar esses artigos em algum lugar. O Meteor vem
 
 Então, apesar do browser/navegador do usuário poder conter algum tipo de estado(por exemplo que página ele está ou o commentário que está digitando), o servidor, especificamente o MongoDB, contém os dados permanentes e canonicais. Por *canonical* nos referimos que é o mesmo para todos usuários, cada usuário pode estar em uma página diferente, mas a lista principal de artigos é a mesma para todos.
 
-////
+Esses dados são armazenados no Meteor em **Coleções**. Uma coleção é uma estrutura especial de dados que através de publicações e subscricões, é responsável pelo sincronismo de dados em tempo real para e de cada browser do usuário conectado no banco de dados Mongo. Vamos ver como.
 
-////
+Nós queremos nossos artigos sejam permanentes e que todos usuários possam ver, então vamos começar criando uma coleção chamada `Posts` para armazenar os artigos. Se você ainda não criou uma pasta `collections/` na pasta principal crie e depois o arquivo `posts.js` dentro da pasta `collections/`.
 
 ~~~js
 Posts = new Meteor.Collection('posts');
@@ -28,66 +28,67 @@ Posts = new Meteor.Collection('posts');
 
 <%= commit "4-1", "Added a posts collection" %>
 
-////
+Código dentro das pastas que não são `client/` e `server/` vão rodar `nos dois` contextos. Então a coleção `Posts` é disponível tanto no cliente como no servidor. Entretanto, o que a coleção faz em cada ambiente é bem diferente.
 
 <% note do %>
 
 ### To Var Or Not To Var?
 
-////
+Em Meteor, a palavra-chave `var` limita o escopo de um objeto para somente aquele arquivo. Nós queremos fazer a coleção `Posts` disponível para toda nossa aplicação, e por isso estamos omitindo a palavra-chave aqui.
 
 <% end %>
 
-////
+No servidor, a coleção tem o trabalho de se comunicar com o banco de dados Mongo, ler e escrever quaisquer mudanças. Nesse sentido, pode ser comparada com um banco de dados de uma biblioteca padrão. No cliente entretando, a coleção é uma copia *segura* the um *subsistema* da coleção real canônica. A coleção do lado do cliente é atualizada constantemente e (na maioria das vezes)
+transparentemente com aquele subsistema da coleção em tempo real.
 
 <% note do %>
 
 ### Console vs Console vs Console
 
-////
+Nesse capítulo nós vamos começar a usar o **console do navegador**, o qual não pode ser confundido com o **terminal** ou o **Mongo shell**. Veja uma introdução de cada um deles.
 
 #### Terminal
 
 <%= screenshot "terminal", "The Terminal" %>
 
-- ////
-- ////
-- ////
-- ////
+- Chamado de seu sistema operacional
+- **Lado do Servidor** `console.log()` chama o resultado aqui.
+- Prompt de commando:`$`.
+- Também conhecido como: Shell Bash
 
-#### Browser Console
+#### Console do Navegador
 
 <%= screenshot "browser-console", "The Browser Console" %>
 
-- ////
-- ////
-- ////
-- ////
+- Chamado de dentro de seu navegador, executa código Javascript.
+- **Lado do Cliente** `console.log()` chama o resultado aqui.
+- Prompt: `>`.
+- Também conhecido como: Javascript Console, DevTools Console
 
 #### Mongo Shell
 
 <%= screenshot "mongo-shell", "The Mongo Shell" %>
 
-- ////
-- ////
-- ////
-- ////
+- Chamado do Terminal com `meteor mongo` ou `mrt mongo`.
+- Dá acesso ao banco de dados da aplicação.
+- Prompt:`>`.
+- Também conhecido como: Mongo Console
 
-////
+Note que em cada caso, você não deve digitar o caracter do prompt (`$`, `❯`, ou `>`) como parte do comando. E você pode assumir que qualquer linha que *não* comece com caracter do prompt é o resultado do comando anterior.
 
 <% end %>
 
 ### Server-Side Collections
 
-////
+No lado do servidor, a coleção atua como uma API em seu banco de dados Mongo. Em seu código do lado do servidor isso permite que você escreva comandos Mongo como `Posts.insert()` ou `Posts.update()`, e eles vão fazer mudanças na coleção `posts` armazenada dentro do Mongo.
 
-////
+Para ver dentro do banco de dados Mongo, abra uma segunda janela do terminal (enquanto `meteor` ainda está rodando na primeira janela), e acesse a pasta de sua aplicação (pelo terminal). Então rode o comando `meteor mongo` para iniciar o Mongo Shell, dentro do terminal você pode digitar Mongo commandos padrões (como sempre, você pode sair com `ctrl+c` atalho do teclado). Por exemplo vamos inserir um novo artigo:
 
 ~~~bash
-> db.posts.insert({title: "A new post"});
+> db.posts.insert({titulo: "Um novo artigo"});
 
 > db.posts.find();
-{ "_id": ObjectId(".."), "title" : "A new post"};
+{ "_id": ObjectId(".."), "titulo" : "Um novo artigo"};
 ~~~
 <%= caption "The Mongo Shell" %>
 
@@ -95,21 +96,21 @@ Posts = new Meteor.Collection('posts');
 
 ### Mongo on Meteor.com
 
-////
+Note que quando você hospedar sua aplicação em *.meteor.com, você também pode acessar o Mongo shell com `meteor mongo minhaApp`.
 
-////
+E enquanto nós estivermos nisso, você pode também ver logs da aplicação escrevendo `meteor logs minhaApp`.
 
 <% end %>
 
-////
+A sintaxe do Mongo é familiar, já que utiliza a interface Javascript. Nós não vamos muito longe na manipulação de dados no Mongo shell, mas vamos dar uma olhada de tempos em tempos só para ver se tudo está certo por lá.
 
-### Client-Side Collections
+### Coleções do Lado do Cliente
 
-////
+Coleções ficam mais interessantes do lado do cliente. Quando você declara `Posts = new Meteor.Collection('posts');` no cliente, o que você está criando é um _local, no browser cache_ de uma coleção Mongo real. Quando falamos sobre coleções do lado-cliente sendo um "cache", nós nos referimos no senso de que ele contém um *subsistema* de seus dados e oferece um acesso muito *rápido* a esses dados.
 
-////
+É importante entender esse ponto pois é fundamental para entender como o Meteor funciona. Em geral, uma coleção do lado do servidor consiste em um subsistema de todos os documentos armazenados em uma coleção Mongo (afinal das contas, não queremos enviar *todo* nosso banco de dados para o cliente).
 
-////
+Esses documentos também são armazenados *na memória do browser* o que significa que acessá-los é basicamente instantaneamente. Então não ocorrem viagens lentas do servidor ou banco de dados para buscar os dados quando você chama `Posts.find()` no cliente, porque os dados já são previamente carregados.
 
 <% note do %>
 
