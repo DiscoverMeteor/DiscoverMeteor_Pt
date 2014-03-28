@@ -7,60 +7,60 @@ contents: Veja o que aconteceu por trás dos panos quando o Meteor troca entre d
 paragraphs: 58
 ---
 
-////
+Nós agora temos votação, contagem e ranque em tempo real. Entretanto, isto leva a uma experiência do usuário errática e chocante já que os artigos pipocam na homepage. Nós usaremos animações para suavizar isso.
 
-### Meteor & the DOM
+### Meteor & o DOM
 
-////
+Antes de podermos começar a parte divertida (fazer as coisas se moverem), nós precisamos entender como o Meteor interage com o DOM (Document Object Model -- a coleção de elementos HTML que produzem os conteúdos de uma página).
 
-////
+O ponto crucial a se manter em mente é que os elementos *não podem ser movidos*. Eles podem apenas ser deletados e criados (note que isto é uma limitação do próprio DOM, não do Meteor). Então para dar a ilusão dos elementos A e B estarem trocando de lugar, Meteor na verdade deletará o elemento B e inserirá uma nova cópia (B') antes do elemento A.
 
-////
+Isto torna complicado fazer animações, já que não se pode simplesmente animar B até uma nova posição, porque B desaparecerá assim que o Meteor re-renderizar a página (o que sabemos que acontece instantaneamente, graças à reatividade). Então, você tem que animar o recém criado B' ao movê-lo da posição do B antigo para sua nova posição antes de A.
 
-////
+Para trocar os artigos A e B (posicionados nas posições p1 e p2, respectivamente), nós seguiríamos os seguintes passos:
 
-1. ////
-2. ////
-3. ////
-4. ////
-5. ////
-6. ////
+1. Delete B
+2. Crie B' antes de A no DOM
+3. Mova B' para p2
+4. Mova A para p1
+5. Anime A para p2
+6. Anime B'para p1
 
-////
+O seguinte diagrama explica esses passos em mais detalhe:
 
 <%= diagram "animation_diagram", "Swtiching two posts", "pull-center" %>
 
-////
+Note que nos passos 3 e 4 nós não estamos *animando* A e B' para suas posições mas "teletransportando" eles para lá instantaneamente. Já que isto é instantâneo, dará a ilusão de que B nunca foi deletado, e posicionará apropriadamente ambos elementos para serem animados de volta a suas novas posições.
 
-////
+Felizmente, o Meteor toma conta dos passos 1 & 2 para nós, então nós apenas precisamos nos preocupar quanto aos passos 3 ao 6.
 
-////
+Além disso, nos passos 5 e 6 tudo que nós estamos fazendo é mover os elementos para seus devidos lugares. Para que a única parte que nós realmente precisemos nos preocupar seja os passos 3 e 4, vulgo enviar os elementos para o ponto de início da animação.
 
-### Proper Timing
+### Timing Certo
 
-////
+Até agora nós falamos sobre *como* animar nossos artigos mas não sobre *quando* animá-los. 
 
-////
+Para os passos 3 e 4, a resposta é na callback de template `rendered` do Meteor dentro do administrador `post_item.js`, a qual é ativada toda vez que uma propriedade do artigo muda (no nosso caso, ranque).
 
-////
+Os passos 5 e 6 são um pouco mais complicados. Pense-os dessa forma: se você dissesse a um andróide perfeitamente lógico para andar para o norte por 5 minutos, e então quando isso terminar andar para o sul por 5 minutos, ele provavelmente deduziria que já que ele terminará no mesmo lugar, ele pode simplesmente salvar energia e não andar.
 
-////
+Então se você quer garantir que seu andróide ande durante os 10 minutos completos, você tem de *esperar* até que ele ande os primeiros 5 minutos, e *então* dizê-lo para voltar.
 
-////
+O navegador funciona de uma forma similar: se nós simplesmente dermos a ele as intruções simultaneamente, as novas coordenadas simplesmente substituiriam as antigas e nada aconteceria. Em outras palavras, o navegador precisa registrar as mudanças na posição como dois pontos separados no tempo, caso contrário ele não será capaz de animá-los.
 
-////
+O Meteor não provê uma callback `justAfterRendered`, mas nós podemos falsificá-la usando `Meteor.defer()`, a qual simplesmente recebe uma função e adia sua execução apenas o suficiente para registrá-la como um evento diferente.
 
-### CSS Positioning
+### Posicionamento CSS
 
-////
+Para animar os artigos sendo reordenados na página, nós teremos de nos aventurar em território CSS. Um review rápido de posicionamento CSS pode ser necessário.
 
-////
+Elementos numa página usam posicionamento **estático** por padrão. Elementos estaticamente posicionados se encaixam no fluxo da página, e suas coordenadas na página não podem ser mudadas ou animadas.
 
-////
+Posicionamento **relativo** por outro lado significa que o elemento também se encaixa no fluxo da página, mas pode ser posicionado *relativamente a sua posição original*.
 
-////
+Posicionamento **absoluto** vai um passo mais adiante e deixa você dar ao elemento coordenadas x/y específicas relativas ao **documento** ou **ao primeiro elemento paterno posicionado absoluta -relativamente**.
 
-////
+Nós utilizaremos posicionamento relativo para animar nossos artigos. Nós já tomamos conta das CSS para você, mas se você precisasse fazer você mesmo tudo que você precisaria fazer seria adicionar este código às suas folhas de estilo:
 
 ~~~css
 .post{
@@ -70,41 +70,41 @@ paragraphs: 58
 ~~~
 <%= caption "client/stylesheets/style.css" %>
 
-////
+Isto faz os passos 5 e 6 bem fáceis: tudo que nós precisamos fazer é configurar `top` para `0px` (seu valor padrão) e nossos artigos escorrerão de volta a suas posições "normais".
 
-////
+Isto significa que nosso único desafio é descobrir para onde animá-los *dos* (passos 3 e 4) em relação a suas novas posições. Em outras palavras, como contrabalanceá-los. Mas isto não é muito difícil também: o contrabalanço correto é simplesmente a posição prévia do artigo menos sua nova.
 
 <% note do %>
 
-### Position:absolute
+### Posição:absoluta
 
-////
+Nós poderíamos também usar `position:absolute` com um pai relativo para posicionar nossos elementos. Mas a grande desvantagem de elementos posicionados absolutamente é que eles estão completamente removidos do fluxo da página, causando o colapso de seu container paterno como se ele estivesse vazio.
 
-////
+Isso então significa que nós precisaríamos artificialmente configurar a altura do container via JavaScript, ao invés de deixar o navegador refluir os elementos naturalmente. Consequentemente, sempre que possível é melhor ficar com posicionamento relativo. 
 
 <% end %>
 
-### Total Recall
+### Recordação Total 
 
-////
+Nós temos mais um problema ainda. Enquanto o elemento A persiste no DOM e pode então "lembrar" sua posição prévia, o elemento B experiencia reencarnação e volta à vida como B' com sua memória completamente vazia.
 
-////
+Felizmente o Meteor vem nos resgastar nos dando acesso ao objeto **instância do template** na callback `rendered`. Como a [documentação do Meteor](http://docs.meteor.com/#template_rendered) afirma:
 
-> ////
+> No corpo da callback, `this` é um objeto da instância do template que é único a esta ocorrência do template e persiste ao longo de re-renderizações.
 
-////
+Então o que nós faremos é encontrar a posição atual do artigo na página, e então armazená-la no objeto de instância do template. Desta forma, mesmo quando o artigo é deletado e recriado, nós ainda saberemos de onde nós devemos animá-lo.
 
-////
+Instância do template também nos deixa acessar a informação da coleção através da propriedade `data`. Isto será útil para pegar o ranque do artigo.
 
-### Ranking Posts
+### Ranqueando Artigos
 
-////
+Nós estivemos falando sobre ranque de artigos, mas este "ranque" não existe de fato como uma propriedade do artigo, já que é uma conseqüência da ordem na qual os artigos são listados na nossa coleção. Se nós quisermos animar os artigos de acordo com seu ranque, nós teremos que de alguma forma conjurar esta propriedade do nada.
 
-////
+Note que nós não podemos por essa propriedade `ranque` no próprio banco de dados, já que o raque é uma propriedade relativa que depende em como você organiza seus artigos (vulgo um artigo pode ser ranqueado primeiro quando organizado por data, mas terceiro quando organizado por pontos).
 
-////
+Nós idealmente poríamos essa propriedade nas nossas coleções `newPosts` e `topPosts`, mas o Meteor ainda não oferece um mecanismo conveniente para fazer isso.
 
-////
+Então, nós inseriremos `rank` no último passo possível, o administrador de template `postList`: 
 
 ~~~js
 Template.postsList.helpers({
@@ -120,9 +120,9 @@ Template.postsList.helpers({
 <%= caption "/client/views/posts/posts_list.js" %>
 <%= highlight "2~8" %>
 
-////
+Ao invés de simplesmente retornar o cursor `Posts.find({}, {sort: {submitted: -1}, limit: postsHandle.limit()})` como nosso ajudante prévio `posts`, `postsWithRank` recebe o cursor e adiciona a propriedade `_rank` a cada um dos seus documentos.
 
-////
+Não esqueça de atualizar o template `postsList` também:
 
 ~~~html
 <template name="postsList">
@@ -130,7 +130,7 @@ Template.postsList.helpers({
     {{#each postsWithRank}}
       {{> postItem}}
     {{/each}}
-
+    
     {{#if nextPath}}
       <a class="load-more" href="{{nextPath}}">Load more</a>
     {{/if}}
@@ -143,19 +143,19 @@ Template.postsList.helpers({
 
 <% note do %>
 
-### Be Kind, Rewind
+### Seja bom, Rebobine
 
-////
+O Meteor é um dos web frameworks mais progressistas e inovadores por aí. Mas um de seus utilitários parece um retrocesso aos dias dos VCRs e gravadores em vídeo cassete, a função `rewind()`.
 
-////
+Sempre que você usa um cursor com `forEach()`, `map()` ou `fetch()`, você precisará rebobinar o cursor depois antes que ele esteja pronto para ser utilizado de novo. 
 
-////
+E em alguns casos, é melhor estar do lado seguro e `rewind()` o cursor preventivamente ao invés de arriscar um erro. 
 
 <% end %>
 
-### Putting it together
+### Juntando tudo
 
-////
+Nós podemos agora por tudo junto ao utilizar a callback do templete `rendered` do administrador do `post_item.js` para a nossa lógica de animação:
 
 ~~~js
 Template.postItem.helpers({
@@ -169,7 +169,7 @@ Template.postItem.rendered = function(){
   var $this = $(this.firstNode);
   var postHeight = 80;
   var newPosition = rank * postHeight;
-
+ 
   // if element has a currentPosition (i.e. it's not the first ever render)
   if (typeof(instance.currentPosition) !== 'undefined') {
     var previousPosition = instance.currentPosition;
@@ -177,13 +177,13 @@ Template.postItem.rendered = function(){
     var delta = previousPosition - newPosition;
     $this.css("top", delta + "px");
   }
-
+  
   // let it draw in the old position, then..
   Meteor.defer(function() {
     instance.currentPosition = newPosition;
     // bring element back to its new original position
     $this.css("top",  "0px");
-  });
+  }); 
 };
 
 Template.postItem.events({
@@ -195,24 +195,24 @@ Template.postItem.events({
 
 <%= commit "14-1", "Added post reordering animation." %>
 
-////
+Não deve ser muito difícil acompanhar se você usar nosso diagrama prévio como referência.
 
-////
+Note que já que nós configuramos a propriedade `currentPosition` na instância do template na callback `defer`, isto significa que esta propriedade não existirá na primeira renderização do fragmento de template. Mas isto não é um problema já que nós não estamos interessados em animar a primeira renderização mesmo.
 
-////
+Agora abra seu site e comece a votar. Você deve agora ver os artigos gentilmente se moverem para cima e para baixo com uma graça de balé!
 
-### Animating New Posts
+### Animando Novos Artigos
 
-////
+Nossos artigos agora estão se reordenando apropriadamente, mas nós não temos realmente uma animação "new post" ainda. Ao invés de simplesmente ter novos artigos pipocando no topo da nossa lista, vamos fade them in.
 
-////
+Isto é na verdade mais complicado do que parece. O problema é que a callback `rendered` do Meteor é disparada em dois casos separados:
 
-1. ////
-2. ////
+1. Quando um novo template é inserido no DOM
+2. Toda vez que a informação subjacente de um template muda
 
-////
+Apenas o caso 1 deve ser animado, a não ser que você queria que a interface do usuário se ilumine como uma árvore de natal toda vez que a informação mudar.
 
-////
+Vamos assegurar que nós apenas animemos os artigos quando eles de fato são novos, e não quando eles são re-renderizados porque a informação mudou. Nós já estamos testando pela presença de uma variável de instância (a qual é apenas definida após a primeira renderização), então nós apenas precisamos voltar a nossa callback `rendered` e adicionar um bloco `else`:
 
 ~~~js
 Template.postItem.helpers({
@@ -220,30 +220,30 @@ Template.postItem.helpers({
 });
 
 Template.postItem.rendered = function(){
-  // animate post from previous position to new position
+  // anima o artigo da posição prévia para a nova posição
   var instance = this;
   var rank = instance.data._rank;
   var $this = $(this.firstNode);
   var postHeight = 80;
   var newPosition = rank * postHeight;
-
-  // if element has a currentPosition (i.e. it's not the first ever render)
+  
+  // se o elemento tem uma currentPosition (vulgo não é a primeira renderização)
   if (typeof(instance.currentPosition) !== 'undefined') {
     var previousPosition = instance.currentPosition;
-    // calculate difference between old position and new position and send element there
+    // calcule a diferença entra a posição antiga e a nova posição e envie o elemento para lá
     var delta = previousPosition - newPosition;
     $this.css("top", delta + "px");
   } else {
-    // it's the first ever render, so hide element
+    // é a primeira renderização, então esconda o elemento
     $this.addClass("invisible");
   }
-
-  // let it draw in the old position, then..
+  
+  // deixe desenhar na posição antiga, então..
   Meteor.defer(function() {
     instance.currentPosition = newPosition;
-    // bring element back to its new original position
+    // traga elemento de volta a sua nova posição original
     $this.css("top",  "0px").removeClass("invisible");
-  });
+  }); 
 };
 
 Template.postItem.events({
@@ -255,16 +255,16 @@ Template.postItem.events({
 
 <%= commit "14-2", "Fade items in when they are drawn." %>
 
-////
+Note que a `removeClass("invisible")` que nós adicionamos na função `defer()` rodará para cada renderização. Mas apenas fará alguma coisa se a classe `.invisible` estiver presente no elemento, o que será verdadeiro apenas a primeira vez que for renderizado.
 
 <% note do %>
 
-### CSS & JavaScript
+### CSS & JavaScript 
 
-////
+Você pode ter notado que nós estamos usando uma classe CSS `.invisible` para disparar a animação ao invés de animar a propriedade CSS `opacity` diretamente como nós fizemos para `top`. Isto é porque para `top`, nós precisavamos animar a propriedade para um valor específico que dependia da informação da instância.
 
-////
+Por outro lado, aqui nós apenas queremos mostrar e esconder um elemento independente de sua informação. Já que é uma boa idéia manter sua CSS longe do seu JavaScript o máximo possível, nós apenas adicionaremos e removeremos a classe aqui, e especificaremos os detalhes da animação na nossa stylesheet. 
 
 <% end %>
 
-////
+Nós devemos finalmente ter o comportamento de animação que nós queríamos. Rode seu aplicativo e experimente! E agora você também pode brincar com as classes `.post` e `.post.invisible` para ver se você consegue desenvolver outras transições. Dica: [CSS easing functions](http://matthewlein.com/ceaser/) é um bom lugar para começar!
