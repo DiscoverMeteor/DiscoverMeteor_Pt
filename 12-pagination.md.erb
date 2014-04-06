@@ -7,24 +7,24 @@ contents: Aprenda mais sobre subscrições em Meteor, e com o podemos usá-la pa
 paragraphs: 67
 ---
 
-////
+O Microscope está com muito bom aspeto, e podemos experar uma receção calorosa quando este for lançado para o mundo. 
 
-////
+Assim provávelmente é boa ideia pensar um pouco sobre as implicações de performance do número de artigos novos que vão ser criados no site quando este for lançado!
 
-////
+Anteriormente falámos de como uma coleção no lado do cliente deve conter um sub conjunto dos dados no servidor, e até conseguimos atingir isto para as nossas coleções de notificações e comentários.
 
-////
+No entanto, atualmente ainda estamos a publicar todos os artigos de uma vez, para todos os utilizadores ligados. Eventualmente, se milhares de links forem submetidos, isto será problemático. Para resolver isto, precisamos de paginar os artigos.
 
-### Adding More Posts
+### Adicionando Mais Artigos
 
-////
+Primeiro, nos nossos dados de teste, vamos carregar artigos suficientes para que a paginação faça realmente sentido:
 
 ~~~js
-// Fixture data
+// Fixture data 
 if (Posts.find().count() === 0) {
 
   //...
-
+  
   Posts.insert({
     title: 'The Meteor Book',
     userId: tom._id,
@@ -33,7 +33,7 @@ if (Posts.find().count() === 0) {
     submitted: now - 12 * 3600 * 1000,
     commentsCount: 0
   });
-
+  
   for (var i = 0; i < 10; i++) {
     Posts.insert({
       title: 'Test post #' + i,
@@ -49,31 +49,31 @@ if (Posts.find().count() === 0) {
 <%= caption "server/fixtures.js" %>
 <%= highlight "15~24" %>
 
-////
+Depois de executar `meteor reset`, você deve obter algo como:
 
-<%= screenshot "12-1", "Displaying dummy data. " %>
+<%= screenshot "12-1", "Mostrando dados de teste." %>
 
-<%= commit "12-1", "Added enough posts that pagination is necessary." %>
+<%= commit "12-1", "Foram adicionados posts suficientes para que a paginação seja necessária" %>
 
-### Infinite Pagination
+### Paginação Infinita
 
-////
+Vamos implementar uma paginação estilo "infinito". O que queremos dizer por este termo é que vamos primeiro mostrar, por exemplo, 10 artigos no ecrã, com um link "carregar mais" no fundo. Clicar neste link vai adicionar mais 10 artigos à lista, e por ai adiante *ad infinitum*. Isto significa que podemos controlar todo o sistema de paginação com um único parâmetro que representa o número de posts a mostrar no ecrã.
 
-////
+Agora vamos precisar de uma forma de comunicar este parâmetro ao servidor para que ele fique a saber quantos artigos enviar para o cliente. Acontece que já estamos a subscrever à publicação `posts` no roteador, portanto vamos tirar vantagem disto e deixar ser também o roteador lidar com a paginação.
 
-////
+A forma mais fácil de configurar isto é simplesmente fazendo o parâmetro limite de artigos parte do caminho, dando-nos URLs na forma `http://localhost:3000/25`. Um bonús adicional de usar o URL comparativamente a outros métodos é que se estamos atualmente a mostrar 25 artigos e por acaso fazemos refresh ao navegador por engano, vamos continuar a ver 25 artigos quando a página voltar a carregar.
 
-////
+Para fazer isto correctamente, vamos precisar de alterar a forma como subscrevemos aos artigos. Tal como previamente fizemos no capitulo *Comentários*, vamos precisar de mover o nosso código da subscrição do nível do *roteador* para o nível da *rota*.
 
-////
+Isto tudo pode ser muito para interiorizar de uma vez, mas vai ficar mais claro vendo o código.
 
-////
+Primeiro, vamos parar de subscrever à publicação `posts` no bloco `Router.configure()`. Basta remover `Meteor.subscribe('posts'),`, deixando apenas a subscrição às `notifications`:
 
 ~~~js
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
-  waitOn: function() {
+  waitOn: function() { 
     return [Meteor.subscribe('notifications')]
   }
 });
@@ -81,12 +81,12 @@ Router.configure({
 <%= caption "lib/router.js" %>
 <%= highlight "5" %>
 
-////
+Depois vamos adicionar um parâmetro `postsLimit` ao caminho da rota. Adicionar um `?` depois do nome do parâmetro significa que é opcional. Ou seja, a nossa rota não só vai combinar com `http://localhost:3000/50`, mas também com o antigo `http://localhost:3000`.
 
 ~~~js
 Router.map(function() {
   //...
-
+  
   this.route('postsList', {
     path: '/:postsLimit?'
   });
@@ -95,20 +95,20 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "5" %>
 
-////
+É importante notar que um caminho na forma `/:parameter?` vai combinar com todos os caminhos possíveis. Dado que cada rota vai ser analisada sucessivamente para ver se combina com o caminho atual, temos de garantir que organizamos as nossas rotas por ordem de especificidade decrescente.
 
-////
+Noutras palavras, rotas que apontem para rotas mais específicas como `/posts/:_id` devem vir primeiro, e a nossa rota `postsList` deve ser movida para o fundo do ficheiro dado que basicamente combina com tudo.
 
-////
+Esta agora na altura de lidar com o problema difícil de subscrever e encontrar os dados corretos. Precisamos de lidar com o caso em que o parâmetro `postsLimit` não está presente, caso em que lhe damos um valor por defeito. Vamos usar "5" para podermos ter espaço para brincar com a paginação.
 
 ~~~js
 Router.map(function() {
   //..
-
+  
   this.route('postsList', {
     path: '/:postsLimit?',
     waitOn: function() {
-      var postsLimit = parseInt(this.params.postsLimit) || 5;
+      var postsLimit = parseInt(this.params.postsLimit) || 5; 
       return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: postsLimit});
     }
   });
@@ -117,7 +117,7 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "6~9" %>
 
-////
+Vai notar que estamos agora a passar um objecto JavaScript ({limit: postsLimit}) em conjunto com o nome da nossa publicação `posts` (artigos). Este objecto vai servir como o parâmetro `options` para o código de servidor `Posts.find()`. Vamos passar para o nosso código de servidor para implementar isto:
 
 ~~~js
 Meteor.publish('posts', function(options) {
@@ -137,15 +137,15 @@ Meteor.publish('notifications', function() {
 
 <% note do %>
 
-### Passing Parameters
+### Passando Parâmetros
 
-////
+O nosso código das publicações está com efeito a dizer ao servidor que este pode confiar em qualquer objecto JavaScript enviado pelo cliente (no nosso caso, `{limit: postsLimit}`) para servir como as `options` da operação de `find()`. Isto torna possível que utilizadores possam submeter qualquer opção que queiram através da consola do navegador.
 
-////
+No nosso caso, isto é relativamente segura, dado que tudo o que o utilizador pode fazer é re-ordenar artigos de forma diferente, ou mudar o limite (que é o que queriamos fazer em primeiro lugar).
 
-////
+No entanto esta abordagem não deve ser usuada quando se estão a guardar dados privados em campos não publicadas, dado que o utilizador poderia manipular a opção `fields` para lhes aceder, e também se deve evitar usar esta abordagem no argumento do selector do `find()` pelas mesmas razões de segurança.
 
-////
+Uma abordagem mais segura poderia ser passar os parâmetros individuais em vez do objecto todo, para garantir que se tem controlo sobre os seus dados:
 
 ~~~js
 Meteor.publish('posts', function(sort, limit) {
@@ -155,41 +155,41 @@ Meteor.publish('posts', function(sort, limit) {
 
 <% end %>
 
-////
+Agora que estamos a subscrever ao nível da rota, também faz sentido definir o contexto de dados no mesmo lugar. Vamos afasternos um pouco da nossa abordagem anteriror e fazer a função `data` devolver um objecto JavaScript em vez de simplesmente devolver um cursor. Isto permitenos criar um contexto de dados *com nome*, a que vamos chamar `posts`.
 
-////
+O que isto significa é simplesmente que em vez estar implicitamente disponível com o `this` dentro do template, o nosso contexto de dados vai estar disponível em `posts`. Para além deste pequeno elemento, o código deverá ser familiar:
 
 ~~~js
 Router.map(function() {
   this.route('postsList', {
     path: '/:postsLimit?',
     waitOn: function() {
-      var limit = parseInt(this.params.postsLimit) || 5;
+      var limit = parseInt(this.params.postsLimit) || 5; 
       return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
     },
     data: function() {
-      var limit = parseInt(this.params.postsLimit) || 5;
+      var limit = parseInt(this.params.postsLimit) || 5; 
       return {
         posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
       };
     }
   });
-
+  
   //..
 });
 ~~~
 <%= caption "lib/router.js" %>
 <%= highlight "8~13" %>
 
-////
+Agora que estamos a definir o contexto de dados ao nivel do roteador podemos com segurança vermo-nos livres do ajudante de template `posts` dentro do ficheiro `posts_list.js`. E dado que chamámos ao nosso contexto de dados `posts` (o mesmo nome do ajudante), nem precisamos de tocar no template `postsList`!
 
-////
+Vamos recapitular. Aqui está o nosso código do `router.js` novo e melhorado deve parecer:
 
 ~~~js
 Router.configure({
   layoutTemplate: 'layout',
   loadingTemplate: 'loading',
-  waitOn: function() {
+  waitOn: function() { 
     return [Meteor.subscribe('notifications')]
   }
 });
@@ -200,11 +200,11 @@ Router.map(function() {
   this.route('postsList', {
     path: '/:postsLimit?',
     waitOn: function() {
-      var limit = parseInt(this.params.postsLimit) || 5;
+      var limit = parseInt(this.params.postsLimit) || 5; 
       return Meteor.subscribe('posts', {sort: {submitted: -1}, limit: limit});
     },
     data: function() {
-      var limit = parseInt(this.params.postsLimit) || 5;
+      var limit = parseInt(this.params.postsLimit) || 5; 
       return {
         posts: Posts.find({}, {sort: {submitted: -1}, limit: limit})
       };
@@ -215,48 +215,48 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "5, 11~21" %>
 
-<%= commit "12-2", "Augmented the postsList route to take a limit." %>
+<%= commit "12-2", "Rota postsList melhorada para receber um limite." %>
 
-////
+Vamos experimentar o nosso novo sitema de paginação. Temos agora a abilidade de mostrar um número arbirtrário de artigos na página inicial simplesmente mudando o parmâmetro de URL. Por exemplo, experimente aceder a `http://localhost:3000/3`. Deve ver algo como isto:
 
-<%= screenshot "12-2", "Controlling the number of posts on the homepage. " %>
+<%= screenshot "12-2", "Controlando o número de artigos na página inicial. " %>
 
 <% note do %>
 
-### Why Not Pages?
+### Porque não páginas?
 
-////
+Porque é que estamos a usar uma abordagem de "paginação infinita" em vez de mostrar páginas sucessivas com 10 artigos cada, como o Google faz com os resultados de pesquisas? Isto é na realidade devido ao paradigma de tempo real usado por Meteor.
 
-////
+Vamos imaginar que estamos a paginar a nossa coleção de `Posts` usando o formato de resultados paginádos do Google, e que estamos atualmente na página 2, que mostra os artigos 10 a 20. O que acontece se outro utilizador apaga qualquer um dos 10 artigos anteriores?
 
-////
+Dados que a nossa aplicação é de tempo real, o nosso conjunto de dados iria mudar. O artigo 10 seria agora o artigo 9, e desepareceria de vista, enquanto que o artigo 11 estaria agora dentro do intervalo. O resultado final seria que o utilizador de repente veria os artigos mudar sem razão aparente!
 
-////
+Mesmo que tolerásssemos este problema de usabilidade, paginação tradicional é complicada de implementar por motivos técnicos.
 
-////
+Vamos voltar ao nosso exemplo anteriror. Nós publicamos os artigos 10 até 20 da coleção `Posts`, mas como iriamos encontrar esses artigos no cliente? Não se pode selecionar os artigos 10 até 20, dados que existem apenas 10 artigos no total no conjunto de dados do cliente.
 
-////
+Uma solução simples seria simplesmente publicar esses 10 artigos no servidor, e depois fazer um `Posts.find()` no cliente para apanhar *todos* os artigos publicados.
 
-////
+Isto funciona se tivermos apenas uma subscrição. Mas e se começarmos a ter mais que uma subscrição de artigos, como vai acontecer em breve?
 
-////
+Vamos supor que uma subscrição pede os artigos 10 até 20, e a outra pelos artigos 30 até 40. Temos agora 20 artigos carregados no cliente no total, sem forma nenhuma de saber quais pertencem a qual subscrição.
 
-////
+Por todas estas razões, paginação tradicional simplesmente não faz muito sentido ao trabalhar com Meteor.
 
 <% end %>
 
-### Creating a Route Controller
+### Criando um Controlador de Rota
 
-////
+Pode ter reparado que estamos a repetir a linha `var limit = parseInt(this.params.postsLimit) || 5;` duas vezes. Além disso, ter o número "5" hard-coded não é exatamente ideal. Isto não é o fim do munda, mas dado que é sempre melhor seguir o principio DRY (Don't Repeat Yourself, Não se repita a si próprio) se tal for possível vamos refatorizar as coisas.
 
-////
+Nós vamos introduzir um novo aspeto do Iron Router, *Controladores de Rota*. Um controlador de rota é simplesmente uma forma de agrupar características de roteamento junta num pacote reutilizável do qual qualquer rota pode herdar. Neste momento vamos apenas utilizá-lo numa única rota, mas vai ver no próximo capítulo como esta característica vai ser útil.
 
 ~~~js
 PostsListController = RouteController.extend({
   template: 'postsList',
-  increment: 5,
-  limit: function() {
-    return parseInt(this.params.postsLimit) || this.increment;
+  increment: 5, 
+  limit: function() { 
+    return parseInt(this.params.postsLimit) || this.increment; 
   },
   findOptions: function() {
     return {sort: {submitted: -1}, limit: this.limit()};
@@ -280,30 +280,30 @@ Router.map(function() {
 ~~~
 <%= caption "lib/router.js" %>
 
-////
+Vamos passar por cada passo. Primeiro, estamos a criar o nosso controlador extendendo de `RouteController`. Depois definimos a propriedade `template` tal como fizemos antes, e depois uma nova propriedade `increment`.
 
-////
+Depos definimos uma nova função `limit` que vai devolver o limite atual, e uma função `findOptions` que vai devolver um objecto de opções. Isto pode parecer como um passo extra, mas vamos fazer uso dele mais tarde.
 
-////
+A seguir, definimos as nossas funções de `waitOn` de `data` tal como antes, excepto que estas vão agora usar as nossa nossa função `findOptions`.
 
-////
+Uma última coisa a fazer é dizer à rota `postsList` para rotear o nosso controlador novo, com a propriedade `controller`. 
 
-<%= commit "12-3", "Refactored postsLists route into a RouteController." %>
+<%= commit "12-3", "Rota postsList refatorizada num RouteController." %>
 
-### Adding A Load More Link
+### Adicionando um Link de Carregar Mais
 
-////
+Temos a paginação a funcionar, e o nosso código tem bom aspeto. Existe só um problema: não existe nenhuma forma de de facto *usar* essa paginação excepto alterando o URL manualmente. Isto definitivamente não é uma boa experiência de utilização, portanto vamos ao trabalho de corrigir isto.
 
-////
+O que queremos fazer é bastante simples. Vamos adicionar um botão de "carregar mais" no fundo da nossa lista de artigos, que vai aumentar o número de artigos atualmente mostrados por 5 cada vez que é clicado. Ou seja, se atualmente estou no URL `http://localhost:3000/5`, clicar "carregar mais" deve trazer-me para `http://localhost:3000/10`. Se chegou a este ponto no livro, confiamos que pode lidar com alguma aritmética!
 
-////
+Como dantes, vamos adicionar a nossa lógica de paginação no roteador. Lembra-se quando demos um nome explicito ao nosso contexto de dados em vez de simplesmente usar um cursor anónimo? Bem, não existe nenhuma regra que diga que a função `data` pode apenas passar cursores, por isso vamos usar a mesma técnica para gerar o URL do nosso botão "carregar mais".
 
 ~~~js
 PostsListController = RouteController.extend({
   template: 'postsList',
-  increment: 5,
-  limit: function() {
-    return parseInt(this.params.postsLimit) || this.increment;
+  increment: 5, 
+  limit: function() { 
+    return parseInt(this.params.postsLimit) || this.increment; 
   },
   findOptions: function() {
     return {sort: {submitted: -1}, limit: this.limit()};
@@ -327,25 +327,25 @@ PostsListController = RouteController.extend({
 <%= caption "lib/router.js" %>
 <%= highlight "16~23" %>
 
-////
+Vamos olhar mais a fundo para este pedaço de magia de roteador. Lembre-se que a rota `postsList` (que vai herdar do controlador `PostsListController` no qual estamos atualmente a trabalhar) recebe um parâmetro `postsLimit`.
 
-////
+Assim quando nós passamos `{postsLimit: this.limit() + this.increment}` ao `this.route.path()`, estamos a dizer à rota `postsList` para construir o seu próprio caminho usando esse objeto JavaScript como contexto de dados.
 
-////
+Noutras palavras, isto é exatamente o mesmo que usar o ajudante `{{pathFor 'postsList'}}` do Handlebars, excepto que estamos a substituir o `this` implicito pelo nosso contexto de dados feito à medida.
 
-////
+Nós estamos a usar esse caminho e a adicioná-lo ao contexto de dados para o nosso template, mas *apenas* se existirem mais artigos para mostrar. A forma como fazemos isto é algo complicada.
 
-////
+Nós sabemos que `this.limit()` devolve o número atual de artigos que gostariamos de motrar, que pode ou ser o valor no URL atual, ou o nosso valor por omissão (5) se o URL não contém nenhum parâmetro.
 
-////
+Por outro lado, `this.posts` refere-se ao cursor atual, por isso `this.posts.fetch().length` refere-se ao número de artigos que estão atualmente no cursor.
 
-////
+O que estamos a dizer aqui é que se pedimos por `n` artigos e recebemos `n` de volta, vamos continuar a mostrar o botão de "carregar mais". Mas se pedimos por `n` e recebemos *menos* que `n`, então isto significa que atingimos o limite e que temos de parar de mostrar esse botão.
 
-////
+Tendo dito isto, o nosso sistema falha num caso: quando o número de itens na nossa base de dados é *exatamente* `n`. Se isso acontecer, o cliente vai pedir `n` artigos e receber `n` artigos de volta e continuar a mostrar o botão "carregar mais", não sabendo que não existem mais itens.
 
-////
+Infelizmente, não existem formas simples de dar a volta a este problema, e por agora vamos ter de nos contentar com esta implementação menos-que-perfeita.
 
-////
+Tudo o que resta fazer é adicionar o link de "carregar mais" no funda da nossa lista de artigos, garantindo que só o mostramos se de facto existirem mais artigos para carregar:
 
 ~~~html
 <template name="postsList">
@@ -353,7 +353,7 @@ PostsListController = RouteController.extend({
     {{#each posts}}
       {{> postItem}}
     {{/each}}
-
+    
     {{#if nextPath}}
       <a class="load-more" href="{{nextPath}}">Load more</a>
     {{/if}}
@@ -363,42 +363,42 @@ PostsListController = RouteController.extend({
 <%= caption "client/views/posts/posts_list.html" %>
 <%= highlight "7~10" %>
 
-////
+Isto é como a sua lista de artigos deve parecer agora:
 
-<%= screenshot "12-3", "The “load more” button. " %>
+<%= screenshot "12-3", "O botão de “carregar mais”." %>
 
-<%= commit "12-4", "Added nextPath() to the controller and use it to step through posts." %>
+<%= commit "12-4", "nextPath() foi adicionado ao controlador e é agora usado para iterar pelos artigos." %>
 
 <% note do %>
 
 ### Count vs Length
 
-////
+Pode estar a perguntar-se porque é que usámos `this.posts.fetch().length` em vez do mais lógico `this.posts.count()`. Isto é simplesmente uma forma temporária de dar a volta [a um problema](https://github.com/meteor/meteor/issues/654) existente em Meteor quando isto foi escrito. Esperemos que seja corrigido  em breve!
 
 <% end %>
 
-### A Better Progress Bar
+### Uma Melhor Barra de Progresso
 
-////
+A nossa paginação está agora a funcionar perfeitamente, mas sofre de um problema irritante: cada vez que carregamos "carregar mais" e o roteador pede mais artigos, voltamos ao template de `loading` enquando esperamos que os novos dados cheguem. O resultado é que de cada vez somos enviados de novo para o topo da página e precisamos de fazer scroll até ao fundo para poder continuar a nossa navegação.
 
-////
+Seria muito, muito melhor se pudessemos ficar na mesma página durante toda a operação, e ao mesmo tempo providenciar algum tipo de indicação de que novos dados estão a ser carregados. Felizmente, isto é precisamente o que o pacote `iron-router-progress` faz.
 
-////
+De forma semelhante ao Safari de iOS ou a sites como Medium e YouTube, `iron-router-progress` adiciona uma fina barra de carregamento ao topo do ecrã. Implementar isto é tão simples como adicionar o pacote à sua aplicação:
 
 ~~~bash
 mrt add iron-router-progress
 ~~~
-<%= caption "bash console" %>
+<%= caption "consola bash" %>
 
-////
+Através da magina dos pacote inteligente, o nosso novo indicador de progresso funciona perfeitamente após instalar! A barra de progresso vai ser ativada para cada rota, e automáticamente completar assim que os dados de cada rota terminem de carregar.
 
-////
+Vamos fazer apenas um pequeno ajuste. Vamos desligar `iron-router-progress` para a rota `postSubmit` dado que esta não precisa de esperar por nenhuns dados de subscrição (no final de contas, é apenas um formulário vazio):
 
 ~~~js
 Router.map(function() {
-
+ 
   //...
-
+  
   this.route('postSubmit', {
     path: '/submit',
     disableProgress: true
@@ -408,19 +408,19 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "7" %>
 
-<%= commit "12-5", "Use the iron-router-progress package to make pagination nicer." %>
+<%= commit "12-5", "Usar o pacote iron-router-progress para fazer a paginação melhor." %>
 
-### Accessing Any Post
+### Acedendo Qualquer Artigo
 
-////
+Estamos atualmente a carregar os 5 mais recentes por omissão, mas o que acontece quando alguém navega para a página individual de um artigo?
 
-<%= screenshot "12-4", "An empty template." %>
+<%= screenshot "12-4", "Um template vazio" %>
 
-////
+Se tentar, vai ver um template de artigo vazio. Isto faz sentido: dissemos ao roteador para subscrever à publicação `posts` ao carregar a rota `postsList`, mas não lhe dissemos o que fazer com a rota `postPage`.
 
-////
+Mas até agora, tudo o que sabes fazer é subscrever a uma lista do `n` últimos artigos. Como pedimos ao servidor por um único artigo específico? Vamos partilhar um pequeno segredo consigo: é possível ter mais que uma publicação para cada coleção!
 
-////
+Então para obter os nossos artigos em falta de volta, vamos simplesmente fazer uma publicação nova, separada, chamada `singlePost` que apenas publica um aritigo, identificado pelo `_id`.
 
 ~~~js
 Meteor.publish('posts', function(options) {
@@ -434,13 +434,13 @@ Meteor.publish('singlePost', function(id) {
 <%= caption "server/publications.js" %>
 <%= highlight "5~7" %>
 
-////
+Agora, vamos subscrever aos artigos corretos no lado do cliente. Já estamos a subscrever à publicação `comments` na função `waitOn` da rota `postPage`, por isso podemos simplesmente adicionar a subscrição a `singlePost` ai. E não nos vamos esqueçer de também adicionar a nossa subscrição à rota `postEdit`, uma vez que esta precisa dos mesmo dados:
 
 ~~~js
 Router.map(function() {
 
   //...
-
+    
   this.route('postPage', {
     path: '/posts/:_id',
     waitOn: function() {
@@ -454,12 +454,12 @@ Router.map(function() {
 
   this.route('postEdit', {
     path: '/posts/:_id/edit',
-    waitOn: function() {
+    waitOn: function() { 
       return Meteor.subscribe('singlePost', this.params._id);
     },
-    data: function() { return Posts.findOne(this.params._id); }
+    data: function() { return Posts.findOne(this.params._id); }    
   });
-
+  
   /...
 
 });
@@ -467,6 +467,6 @@ Router.map(function() {
 <%= caption "lib/router.js" %>
 <%= highlight "7~12,18~20" %>
 
-<%= commit "12-6","Use a single post subscription to ensure that we can always see the right post." %>
+<%= commit "12-6","Usar uma subscrição a um único artigo para garantir que podemos sempre o artigo correto." %>
 
-////
+Com a paginação implementada, a nossa aplicação já não sofre de problemas de escalabilidade, e os utilizadores de certeza vão contribuir com ainda mais links que antes. Não seria então bom ter uma forma qualquer de classificar esses links? Isto é prcisamente o tópico do próximo capítulo, *Votação*.
