@@ -315,7 +315,7 @@ PostsListController = RouteController.extend({
     return Posts.find({}, this.findOptions());
   },
   data: function() {
-    var hasMore = this.posts().fetch().length === this.limit();
+    var hasMore = this.posts().count() === this.limit();
     var nextPath = this.route.path({postsLimit: this.limit() + this.increment});
     return {
       posts: this.posts(),
@@ -337,7 +337,7 @@ Nós estamos a usar esse caminho e a adicioná-lo ao contexto de dados para o no
 
 Nós sabemos que `this.limit()` devolve o número atual de artigos que gostaríamos de mostrar, que pode ou ser o valor no URL atual, ou o nosso valor por omissão (5) se o URL não contém nenhum parâmetro.
 
-Por outro lado, `this.posts` refere-se ao cursor atual, por isso `this.posts.fetch().length` refere-se ao número de artigos que estão atualmente no cursor.
+Por outro lado, `this.posts` refere-se ao cursor atual, por isso `this.posts.count()` refere-se ao número de artigos que estão atualmente no cursor.
 
 O que estamos a dizer aqui é que se pedimos por `n` artigos e recebemos `n` de volta, vamos continuar a mostrar o botão de "carregar mais". Mas se pedimos por `n` e recebemos *menos* que `n`, então isto significa que atingimos o limite e que temos de parar de mostrar esse botão.
 
@@ -368,14 +368,6 @@ Isto é como a sua lista de artigos deve parecer agora:
 <%= screenshot "12-3", "O botão de “carregar mais”." %>
 
 <%= commit "12-4", "nextPath() foi adicionado ao controlador e é agora usado para iterar pelos artigos." %>
-
-<% note do %>
-
-### Count vs Length
-
-Pode estar a perguntar-se porque é que usámos `this.posts.fetch().length` em vez do mais lógico `this.posts.count()`. Isto é simplesmente uma forma temporária de dar a volta [a um problema](https://github.com/meteor/meteor/issues/654) existente em Meteor quando isto foi escrito. Esperemos que seja corrigido  em breve!
-
-<% end %>
 
 ### Uma Melhor Barra de Progresso
 
