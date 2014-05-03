@@ -8,25 +8,25 @@ contents: Aprenda como publicações e subscrições funcionam.|Aprenda o que o 
 paragraphs: 52
 ---
 
-////
+Publicações e subscrições são uns dos mais importantes conceitos no Meteor, mas pode ser difícil ser difícil você entender enquanto está começando. 
 
-////
+Isso levou a uma série de mal-entendidos, como a crença de que o Meteor é inseguro, ou que as aplicações Meteor não podem lidar com grandes quantidades de dados.
 
-////
+Uma grande parcela do motivo das pessoas inicialmente acharem estes conceitos um pouco confusos é a "mágica" que o Meteor faz por nós. Embora essa mágica seja muito útil, ela pode obscurecer o que está de fato acontecendo por trás das cenas (o que uma mágica tende a fazer). Então vamos analisar as camadas dessa mágica e entender o que está acontecendo. 
 
-### The Olden Days
+### Os Velhos Tempos
 
-////
+Mas primeiro, vamos olhar para os bons velhos tempos em 2011 quando o Meteor ainda não havia sido lançado. Vamos dizer que você está fazendo um simples aplicativo Rails. Quando um usuário entra no site, o cliente (i.e seu navegador) manda uma requisição para sua aplicação, que está vivendo no servidor.
 
-////
+O primeiro trabalho da aplicação é perceber qual dado o usuário precisa de visualizar. Isso pode ser a página 12 dos resultados da busca, informação do perfil de usuário da Mary, os últimos 20 tweets de Bob, e por ai vai. Você pode nisso como sendo, basicamente, um atendente de livraria navegando entre os corredores para encontrar o livro que você pediu.
 
-////
+Uma vez que o dado correto tenha sido selecionado, o segundo trabalho da aplicação é traduzir este dado em um belo e legível HTML (ou JSON no caso de uma API).
 
-////
+Na metáfora da livraria, isso seria embrulhar o livro que você comprou em uma embalagem e colocá-lo em uma bela bolsa. Esta é a parte "View" (visão/vista) do famoso modelo Model-View-Controller (Modelo-Visão-Controlador).
 
-////
+Finalmente, a aplicação pega o código HTML e manda para o navegador. O trabalho da aplicação é finalizado, e agora que tudo está fora de suas mãos virtuais você pode pegar uma cerveja enquanto espera pela próxima requisição.
 
-### The Meteor Way
+### O Caminho do Meteor
 
 ////
 
