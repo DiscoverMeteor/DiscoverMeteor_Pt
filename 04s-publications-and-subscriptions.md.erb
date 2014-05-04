@@ -28,15 +28,15 @@ Finalmente, a aplicação pega o código HTML e manda para o navegador. O trabal
 
 ### O Caminho do Meteor
 
-////
+Vamos rever o que faz o Meteor ser tão especial em comparação. Como vimos, a principal inovação do Meteor é que enquanto aplicações Rails estão vivas apenas **no servidor**, um aplicativo Meteor inclui um componente no lado do cliente que vai rodar **no cliente** (o navegador).
 
-<%= diagram "client-server", "Pushing a subset of the database to the client.", "pull-right" %>
+<%= diagram "client-server", "Colocando um subgrupo do banco de dados no cliente.", "pull-right" %>
 
-////
+Isso é como um balconista que não apenas encontra o livro pra você, mas também te segue até em casa e lê o livro para você à noite (fato que vamos admitir soar um pouco assustador).
 
-////
+Essa arquitetura permite ao Meteor fazer várias coisas legais, principalmente com o que o Meteor chama de [database evertwhere](http://docs.meteor.com/#sevenprinciples) (banco de dados em todos os lugares). Simplesmente,  Meteor vai pegar uma parte do seu banco de dados e *copiá-lo para o cliente*.
 
-////
+Isso tem duas grandes implicações: primeira, ao invés de mandar código HTML para o cliente, a aplicação Meteor vai mandar **o real, dado puro** e o cliente vai lidar com ele ([data on the wire](http://docs.meteor.com/#sevenprinciples) - dado na rede). Segundo, você vai ser capaz de **acessar o dado instantaneamente** sem ter que esperar por uma ida e volta do servidor ([latency compensation](http://docs.meteor.com/#sevenprinciples) - compensação de latência).
 
 ### Publishing
 
