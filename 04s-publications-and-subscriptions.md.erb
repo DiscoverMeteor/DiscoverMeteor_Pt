@@ -75,44 +75,44 @@ O protocolo que é utilizado neste funil é chamado **DDP** (que significa Distr
 
 <% end %>
 
-### Subscribing
+### Subscrição 
 
-////
+Mesmo que seja nossa intenção deixar qualquer publicação não marcada disponível para os clientes, nós não podemos simplesmente enviar milhares de publicações de uma vez. Nós precisamos de uma forma para os clientes especificarem qual subgrupo de dados eles precisam em um momento em particular, e é exatamente ai que as **subscrições** entram.
 
-////
+Todo dado que você se subscrever vai ser **espelhado** no cliente graças ao Minimongo, a implementação do MongoDB feita pelo Meteor no lado do cliente. 
 
-////
+Por exemplo, vamos dizer que estamos atualmente navegando na página perfil de Bob Smith, e somente queremos mostrar **seus** posts.
 
-<%= diagram "collections-3", "Subscribing to Bob's posts will mirror them on the client.", "pull-center" %>
+<%= diagram "collections-3", "Subscrevendo nos posts de Bob irá espelhá-los no cliente .", "pull-center" %>
 
-////
+Primeiro, iríamos alterar nossa publicação para receber um parâmetro:
 
 ~~~js
-// on the server
+// no servidor
 Meteor.publish('posts', function(author) {
   return Posts.find({flagged: false, author: author});
 });
 ~~~
 
-////
+E podemos então definir este parâmetro quando nos *subscrevermos* nesta publicação no código do nosso aplicativo no lado do cliente: 
 
 ~~~js
-// on the client
+// no cliente
 Meteor.subscribe('posts', 'bob-smith');
 ~~~
 
-////
+Assim é como torna uma aplicação Meteor escalável no lado do cliente: Ao invés de se subscrever para *todos* os dados disponíveis, você somente escolhe as partes que você precisa atualmente. Dessa forma, você vai evitar sobrecarga de memória no browser não importando o quão grande seja seu banco de dados no lado do servidor.
 
-### Finding
+### Encontrando (finding)
 
-////
+Agora os posts de Bob devem ser espalhados em mútiplas categorias (por exemplo: "JavaScript", "Ruby" e "Python"). Talvez ainda queiramos carregar todos os posts de Bob na memória, mas nós queremos mostrar somente aqueles da categoria "JavaScript" por agora. Nessa hora que "encontrar" (find) aparece.
 
-<%= diagram "collections-4", "Selecting a subset of documents on the client.", "pull-center" %>
+<%= diagram "collections-4", "Selecionando um subgrupo de documentos no cliente.", "pull-center" %>
 
-////
+Da mesma forma que fizemos no servidor, nós vamos usar a função `Posts.find()` para selecionar um subgrupo de nossos dados:
 
 ~~~js
-// on the client
+// no cliente
 Template.posts.helpers({
   posts: function(){
     return Posts.find(author: 'bob-smith', category: 'JavaScript');
@@ -120,7 +120,7 @@ Template.posts.helpers({
 });
 ~~~
 
-////
+Agora que nós temos uma boa compreensão de como as publicações e subscrições funcionam, vamos mergulhar e rever alguns padrões comuns de implementação.
 
 ### Autopublish
 
