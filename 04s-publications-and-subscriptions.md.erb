@@ -38,40 +38,40 @@ Essa arquitetura permite ao Meteor fazer várias coisas legais, principalmente c
 
 Isso tem duas grandes implicações: primeira, ao invés de mandar código HTML para o cliente, a aplicação Meteor vai mandar **o real, dado puro** e o cliente vai lidar com ele ([data on the wire](http://docs.meteor.com/#sevenprinciples) - dado na rede). Segundo, você vai ser capaz de **acessar o dado instantaneamente** sem ter que esperar por uma ida e volta do servidor ([latency compensation](http://docs.meteor.com/#sevenprinciples) - compensação de latência).
 
-### Publishing
+### Publicação
 
-////
+O banco de dados de um aplicativo pode conter dez mil documentos, sendo alguns destes privados ou sensíveis. Então obviamente não devemos simplesmente espelhar nosso banco de dados completamente no cliente, por razões de segurança e escabilidade.
 
-////
+Então vamos precisar de uma forma de dizer ao Meteor quais **subgrupos** de dados podem ser enviados ao cliente, e vamos realizar isso através de uma **publicação**. 
 
-////
+Vamos voltar ao Microscope. Aqui estão todos os posts do no aplicativo situados no banco de dados:
 
-<%= diagram "collections-1", "All the posts contained in our database.", "pull-center" %>
+<%= diagram "collections-1", "Todos os posts contidos no nosso banco de dados.", "pull-center" %>
 
-////
+Embora esse recurso reconhecidamente não exista no Microscope, vamos imaginar que alguns de nossos posts tenham sido marcados por linguagem abusiva. Mesmo que queiramos que eles continuem em nosso banco de dados, eles não devem estar disponíveis para os usuários (i.e enviados ao cliente).
 
-////
+Nossa primeira tarefa vai ser dizer ao Meteor qual dado nós **vamos** querer enviar ao cliente. Vamos dizer ao Meteor que desejamos **publicar** apenas os posts sem marcações:
 
-<%= diagram "collections-2", "Excluding flagged posts.", "pull-center" %>
+<%= diagram "collections-2", "Excluindo posts marcados.", "pull-center" %>
 
-////
+Aqui temos o código correspondente, que deve estar no servidor:
 
 ~~~js
-// on the server
+// no servidor
 Meteor.publish('posts', function() {
   return Posts.find({flagged: false});
 });
 ~~~
 
-////
+Isso assegura para que **não exista uma forma** de um cliente estar apto a acessar post marcados. Isso é exatamente a forma que você torna uma aplicação Meteor segura: apenas assegure-se de publicar dados que você queira que estejam disponíveis para acesso no cliente.
 
 <% note do %>
 
 ### DDP
 
-////
+Fundamentalmente, você pode pensar sobre o sistema de publicação/subscrição como um funil que transfere dados de uma coleção no lado do servidor para uma coleção no lado do cliente.  
 
-////
+O protocolo que é utilizado neste funil é chamado **DDP** (que significa Distributed Data Protocol - Protocolo de Dados Distribuidos). Para aprender mais sobre DDP, você pode assistir [essa palestra da *Real-Time Conference*](http://2012.realtimeconf.com/video/matt-debergalis) por Matt DeBergalis (um dos fundadores do Meteor), ou [este screencast](http://www.eventedmind.com/posts/meteor-subscriptions-and-ddp) por Chris Mather que conduz você por este conceito com um pouco mais de detalhe.
 
 <% end %>
 
