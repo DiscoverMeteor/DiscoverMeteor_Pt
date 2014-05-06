@@ -122,23 +122,23 @@ Template.posts.helpers({
 
 Agora que nós temos uma boa compreensão de como as publicações e subscrições funcionam, vamos mergulhar e rever alguns padrões comuns de implementação.
 
-### Autopublish
+### Publicação Automática (autopublishing)
 
-////
+Se você criar um projero Meteor do zero (i.e usando `meteor create`), ele vai ter automaticamente o pacote `autopublish` ativado. Para começar, vamos falar sobre o que ele exatamente faz.  
 
-////
+O objetivo do `autopublish` é deixar extremamente simples o início da codificação da sua aplicação Meteor, e ele faz isso espelhando automaticamente **todos os dados** do servidor para o cliente, tomando conta das publicações e subscrições para você.
 
 <%= diagram "autopublish", "Autopublish", "pull-center"%>
 
-////
+Como isso funciona? Suponha que você tenha uma coleção chamada `'posts'` no servidor. Então `autopublish` vai automaticamente enviar cada post que encontrar na coleção *posts* no Mongo para uma coleção chamada `'posts'` no cliente (assumindo que exista um).  
 
-////
+Se você estiver usando `autopublish`, você não precisa de pensar sobre publicações. Os dados serão ubíquos (presentes em todos os lugares), e as coisas se tornam simples. Claro, existem problema óbvios de ter uma cópia completa do banco de dados da sua aplicação *cacheada* na máquina de cada usuário.
 
-////
+Por esse motivo, *autopublish* é apropriado somente quando você está começando, e ainda não pensou sobre as publicações
 
-### Publishing Full Collections
+### Publicando Coleções Completas
 
-////
+Uma vez que você remova o `autopublish`, você vai rapidamente perceber que todos os seus dados desapareceram do seu cliente. Uma forma simples de tê-los novamente é duplicando o que o *autopublish* faz, publicando uma coleção integralmente. Por exemplo:
 
 ~~~js
 Meteor.publish('allPosts', function(){
@@ -146,13 +146,13 @@ Meteor.publish('allPosts', function(){
 });
 ~~~
 
-<%= diagram "fullcollection", "Publishing a full collection", "pull-center" %>
+<%= diagram "fullcollection", "Publicando uma coleção completa", "pull-center" %>
 
-////
+Nós ainda estamos publicando coleções completas, mas ao menos agora temos controle sobre quais coleções publicamos ou não. Neste caso, estamos publicando a coleção `Posts` mas `Comments` não.
 
-### Publishing Partial Collections
+### Publicando Coleções Parcialmente
 
-////
+O próximo nível de controle é publicar somente **parte** de uma coleção. Por exemplo somente os posts que pertencem a um certo autor:
 
 ~~~js
 Meteor.publish('somePosts', function(){
@@ -160,11 +160,11 @@ Meteor.publish('somePosts', function(){
 });
 ~~~
 
-<%= diagram "partialcollection", "Publishing a partial collection", "pull-center" %>
+<%= diagram "partialcollection", "Publicando uma coleção parcialmente", "pull-center" %>
 
 <% note do %>
 
-### Behind The Scenes
+### Nos Bastidores
 
 ////
 
