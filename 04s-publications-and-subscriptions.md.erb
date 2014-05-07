@@ -166,27 +166,27 @@ Meteor.publish('somePosts', function(){
 
 ### Nos Bastidores
 
-////
+Se você leu a [documentação do Meteor sobre publicação](http://docs.meteor.com/#publishandsubscribe), você talvez deve estar sobrecarregado com as instruções de se usar `added()` e `ready()` para configurar os atributos de registros no cliente, e se deve ter se esforçado para conciliar isso com os aplicativos Meteor que você viu e nunca usam esses métodos.
 
-////
+A razão é que o Meteor fornece uma importante conveniência: o método `_publishCursor()`. Você nunca viu seu uso? Talvez não diretamente, mas se você retornar um [cursor](/chapter/meteor-vocabulary/) (i.e. `Posts.find({'author':'Tom'})`) em uma função de publicação, isso é exatamente o que o Meteor está usando.
 
-////
+Quando o Meteor vê que a publicação `somePosts` retornou um cursor, ele chama `_publishCursor()` também -- você adivinhou -- publicando este cursor automaticamente.
 
-////
+Aqui o que o `_publishCursor()` faz:
 
-- ////
-- ////
-- ////
+- Checa o nome da coleção no lado do servidor.
+- Puxa e encontra documentos a partir do cursor e o envia dentro de uma coleção no lado do cliente *com o mesmo nome*. (Usando `.added()` para fazer isso).
+- Sempre que um documento for adicionado, removido ou alterado, ele envia estas mudanças para a coleção no lado do cliente. (Ele usa `.observe()` no cursor e `.added()`, `.changed()` e `.removed()` para fazer isso).
 
-////
+No exemplo acima, nós somos capazes de assegurar que o usuário tenha somente os posts que estiver interessado (os escritos por Tom) disponíveis em cache no lado do cliente.
 
 <% end %>
 
-### Publishing Partial Properties
+### Publicando Propriedades Parciais
 
-////
+Nós vimos como publicar somente alguns de nossos posts, mas nós podemos continuar cortando mais coisas! Vamos ver como publicar somente *propriedades* específicas.
 
-////
+Como anteriormente, vamos usar `find()` para retornar um cursor, mas dessa vez vamos excluir alguns campos:
 
 ~~~js
 Meteor.publish('allPosts', function(){
@@ -196,9 +196,9 @@ Meteor.publish('allPosts', function(){
 });
 ~~~
 
-<%= diagram "partialproperties", "Publishing partial properties", "pull-center" %>
+<%= diagram "partialproperties", "Publicando propriedades parciais", "pull-center" %>
 
-////
+Claro, nós também podemos combinar ambas as técnicas. Por exemplo, se nós quisermos retornar todos os posts de Tom enquanto deixamos de lado suas datas, podemos escrever assim:
 
 ~~~js
 Meteor.publish('allPosts', function(){
@@ -208,10 +208,10 @@ Meteor.publish('allPosts', function(){
 });
 ~~~
 
-### Summing Up
+### Resumindo
 
-////
+Nós vimos como publicar todas as nossas propriedades de todos os documentos e de todas as coleções (com `autopublish`) até como publicar *algumas* propriedades de *alguns* documentos de *algumas* coleções.
 
-////
+Isso cobre o básico do que você pode fazer com as publicações no Meteor, e estas simples técnicas devem ser suficientes para a vasta maioria dos casos.
 
-////
+As vezes, você vai precisar ir além combinando, linkando ou fundindo publicações. Nós vamos cobrir isso em outro capítulo!
