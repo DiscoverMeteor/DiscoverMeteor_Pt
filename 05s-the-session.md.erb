@@ -8,32 +8,32 @@ contents: Aprenda sobre a Sessão no Meteor.|Aprenda sobre a função autorun.|A
 paragraphs: 33
 ---
 
-////
+Meteor é um framework reativo. O que significa é que quando os dados são alterados, coisas em sua aplicação mudam sem você ter que explicitamente fazer alguma coisa.
 
-////
+Nós já vimos isso em ação e como nossos templates mudam quando os dados e as rotas mudam.
 
-////
+Vamos mergulhar fundo e saber como isso funciona nos próximos capítulos, mas por agora, gostaríamos de introduzir algumas propriedades básicas da reatividade que são extremamente úteis para maioria das aplicações.
 
-### The Meteor Session
+### A Meteor "Session"
 
-////
+Agora no Microscope, o estado atual da aplicação do usuário está completamente contido na URL que ele está procurando (e o banco de dados).
 
-////
+Mas em vários casos, você vai precisar armazenar algum estado efêmero que só é relevante a versão atual do usuário da aplicação (por exemplo, se um elemento está exposto ou escondido). A *Session* é uma forma conveniente de se fazer isso.
 
-////
+A *Session* é um dado reativo global armazenado. Ele é global no sentido de um objeto *singleton* global: há uma sessão, e ela é acessível em todo lugar. Variáveis globais geralmente são vistas como coisas ruins, mas neste caso a sessão é usada como um veículo central de comunicação para diferentes partes da aplicação.
 
-### Changing the Session
+### Mudando a *Session*
 
-////
+Esta "sessão" está disponível como `Session`. Para configurar um valor de sessão, você pode chamar:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A different title');
 ~~~
 <%= caption "Browser console" %>
 
-////
+Você pode ler o dado de volta com `Session.get('mySessionProperty');`. Isso é uma fonte reativa de dados, que significa que se você colocá-la em um *helper*, você verá a saída do helper mudando reativamente quando a variável *Session* for alterada.
 
-////
+Para testar isso, adiocione o seguinte código no modelo do layout.
 
 ~~~html
 <header class="navbar">
@@ -51,16 +51,16 @@ Template.layout.helpers({
 ~~~
 <%= caption "client/views/application/layout.js"%>
 
-////
+A atualização automatica do Meteor (conhecida como "hot code reload" HCR) conserva as varáveis *Session*, então podemos agora ver "A different title" na barra de navegação. Se não, apenas digite o comando `Session.set()` novamente. 
 
-////
+Além disso se nós mudarmos o valor mais uma vez (novamente no console do browser), nós vamos ver outro título sendo mostrado:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A brand new title');
 ~~~
 <%= caption "Browser console" %>
 
-////
+*Session* está disponível globalmente, então estas mudanças podem ser feitas em qualquer lugar da aplicação. Isso nos dá muio poder, mas pode também ser uma armadilha se usado exageradamente.
 
 <% note do %>
 
