@@ -64,17 +64,17 @@ Além disso se nós mudarmos o valor mais uma vez (novamente no console do brows
 
 <% note do %>
 
-### Identical Changes
+### Mudanças Idênticas
 
-////
+Se você modificar uma variável *Session* com `Session.set()` mas configurá-la com um valor idêntico, o Meteor é inteligente o suficiente para desviar a cadeia reativa, e evitar a chamada do método.
 
 <% end %>
 
-### Introducing Autorun
+### Introduzindo o Autorun
 
-////
+Vimos um exmplo de fonte de dados reativa, e também vimos isso em ação dentro de um *template helper* (modelo auxiliar). Mas enquanto alguns contextos no Meteor (como os template helpers) são inerentemente reativos, a maioria do nosso código Meteor continua sendo o bom e velho JavaScript não-reativo.
 
-////
+Vamos supor que temos o seguinte trecho de código em algum lugar de nosso aplicativo:
 
 ~~~js
 helloWorld = function() {
@@ -82,29 +82,29 @@ helloWorld = function() {
 }
 ~~~
 
-////
+Mesmo que estejamos chamando uma variável Session, o *contexto* em que a chamada é feita não é reativo, significando que nós não vamos ter um novo `alert` toda as vezes que mudarmos a variável.
 
-////
+Ai é onde o [Autorun](http://docs.meteor.com/#deps_autorun) entra. Como o nome implica, o código dentro de um bloco `autorun` vai rodar automaticamente e continuar rodando toda vez que a fonte de dados reativa usada mudar.
 
-////
+Tente digitar isso dentro do console do navegador:
 
 ~~~js
 ❯ Deps.autorun( function() { console.log('Value is: ' + Session.get('pageTitle')); } );
 Value is: A brand new title
 ~~~
-<%= caption "Browser console" %>
+<%= caption "Console do navegador" %>
 
-////
+Como se poderia esperar, o bloco de código fornecido dentro de `autorun` roda uma vez, retornando esse dado para o console. Agora, vamos tentar mudar o título:
 
 ~~~js
 ❯ Session.set('pageTitle', 'Yet another value');
 Value is: Yet another value
 ~~~
-<%= caption "Browser console" %>
+<%= caption "Console do navegador" %>
 
-////
+Mágica! Como o valor da sessão mudou, o `autorun` sabia que tinha que rodar este conteúdo todo novamente, re-imprimindo o novo valor no console.
 
-////
+Agora voltando ao exemplo anterior, se nós queremos disparar um novo alerta toda as vezes que nossa variável Session for alterada, tudo que temos que fazer é envolver nosso código em um bloco `autorun`:
 
 ~~~js
 Deps.autorun(function() {
@@ -112,7 +112,7 @@ Deps.autorun(function() {
 });
 ~~~
 
-////
+Como acabamos de ver, *autoruns* pode ser muito útil para rastrear fontes de dados e reagir imperativamente com elas.
 
 ### Hot Code Reload
 
