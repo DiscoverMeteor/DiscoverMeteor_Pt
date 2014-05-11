@@ -116,11 +116,11 @@ Como acabamos de ver, *autoruns* pode ser muito útil para rastrear fontes de da
 
 ### Hot Code Reload
 
-////
+Durante nosso desenvolvimento do Microscope, temos tirado proveito de uma das propriedades do Meteor que salvam tempo: *Hot Code Reload* (HCR). Sempre que salvamos um de nossos arquivos de códigos, o Meteor detecta a mudança e reinicia o servidor, informando a cada cliente do recarregamento da página.
 
-////
+Isso é similar a uma atualização automática da página, mas com uma importante diferença.
 
-////
+Para saber qual é essa diferença, comece reconfigurando a variável *Session* que temos usado:
 
 ~~~js
 ❯ Session.set('pageTitle', 'A brand new title');
@@ -129,7 +129,7 @@ Como acabamos de ver, *autoruns* pode ser muito útil para rastrear fontes de da
 ~~~
 <%= caption "Browser console" %>
 
-////
+Se nós recarregarmos nossa janela do navegador manualmente, nossa variável *Session* naturalmente vai ser perdida (uma vez que seria criada uma nova sessão). Do outro lado, se nós dispararmos um *hor code reload* (por exemplo, salvando um de nossos arquivos de código) a página vai ser recarregada, mas a variável *session* vai continuar configurada. Tente agora!
 
 ~~~js
 ❯ Session.get('pageTitle');
@@ -137,11 +137,11 @@ Como acabamos de ver, *autoruns* pode ser muito útil para rastrear fontes de da
 ~~~
 <%= caption "Browser console" %>
 
-////
+Então se estivermos usando variáveis de sessão para rastrear exatamente o que o usuário está fazendo, o HCR deve ser transparente para o usuário, pois isso vai preservar o valor de todas as variáveis de sessão. Isso nos permite fazer o *deploy* de novas versões em produção de nossas aplicações Meteor com a confiança de que nossos usuários vão ser minimamente interrompidos.
 
-////
+Considere isso por um instante. Se nós podemos manter todo o nosso estado na URL e na sessão, nós podemos transparentemente mudar o _código fonte rodando_ por baixo de cada aplicação do cliente com uma interrupção mínima.
 
-////
+Vamos checar o que acontece quando nós atualizamos a página manualmente:
 
 ~~~js
 ❯ Session.get('pageTitle');
@@ -149,9 +149,9 @@ null
 ~~~
 <%= caption "Browser console" %>
 
-////
+Quando nós recarregamos a página, nós perdemos a sessão. Com o HCR, o Meteor salva a sessão em *local storage* no seu navegador e a carrega novamente depois do recarregamento. Entretanto, o comportamente alternativo no recarregamento explícito faz sentido: se um usuário recarrega a página, é como se ele tivesse ido para a mesma URL novamente, e ele deseja resetar ao ponto inicial que qualquer usuário vai ver quando visita a URL.
 
-////
+As importantes lições em tudo que foi visto são:
 
-1. ////
-2. ////
+1. Sempre armazene esados de usuário na *Session* ou na URL, assim os usuários serão minimamente interrompidos quando um HCR acontecer.
+2. Armazene qualquer estado que você queira que seja compartilhável entre usuários *dentro da própria URL*.
