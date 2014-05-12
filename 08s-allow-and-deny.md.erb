@@ -4,23 +4,23 @@ slug: allow-e-deny
 date: 0008/01/02
 number: 8.5
 sidebar: true
-contents: Aprenda sobre Allow e Deny callbacks.|Entenda em que order os callbacks são chamados.
+contents: Aprenda sobre os callbacks Allow e Deny.|Entenda em que order os callbacks são chamados.
 paragraphs: 16
 ---
 
-////
+O sistema de segurança do Meteor permite que controlemos a modificação do banco de dados sem ter que definir métodos toda vez que quisermos fazer alterações.
 
-////
+Pelo fato de precisarmos fazer tarefas auxiliares como decorar o post com propriedades extras e tomar medidas especiais quando a URL do post já tenha sido registrada, usar um método `post` específico faz muito sentido quando o criamos.
 
-////
+Por outro lado, nós não precisamos realmente criar novos métodos para atualizar e deletes posts. Nós precisamos apenas de verificar se o usuário tem permissão para estas ações, e isso é feito facilmente pelos callbacks `allow` e `deny`.
 
-////
+Usar estes callbacks nos permite ser mais declarativos sobre modificações no banco de dados, e dizer que tipo de atualizações pode ser usadas. O fato de eles se integrarem com o sistema de contas é um bônus.
 
-### Multiple callbacks
+### Callbacks Múltiplos
 
-////
+Nós podemos definir quantos callbacks `allow` forem necessários. Precisamos apenas de _ao menos um_ deles para retornar `true` para a devida mudança que está ocorrendo. Entao quando `Posts.insert` é chamado no navegador (não importando se foi chamado do nosso aplicativo no lado do cliente ou pelo console), o servidor vai chamar uma verificação `insert` permitida até encontrar uma que retorne `true`. Se ele não encontrar nenhuma, ele não permitirá a inserção, e vai retornar um error `403` no cliente.
 
-////
+Similarmente, podemos definir um ou mais callbacks `deny`. Se _qualquer_ destes callbacks retornarem `true`, a mudança vai ser cancelada e um erro `403` vai ser retornado. A lógica disso é que para um `insert` bem sucedido, um ou mais callback `allow` `insert` assim como _todo_ callback `deny` `insert` vai ser executado. 
 
 <%= diagram "allow_deny", "Note: n/e stands for Not Executed" %>
 
