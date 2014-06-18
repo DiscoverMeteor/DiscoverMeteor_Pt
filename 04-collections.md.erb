@@ -120,13 +120,13 @@ A implementação do Mongo no lado do cliente Meteor se chama MiniMongo. Entreta
 
 <% end %>
 
-### Client-Server Communication
+### Comunicação cliente-servidor
 
-////
+A parte mais importante é como se sincronizam os dados da coleção do cliente com a coleção do mesmo nome (no nosso caso `posts`) do servidor.
 
-////
+Ao invés de explicar isso em detalhes minuciosos, vamos ver na prática o que acontece.
 
-////
+Começaremos abrindo duas janelas do navegador, e o acesso ao console em cada uma delas. Em seguida, abrimos o console do Mongo na linha de comando. Neste ponto, nos três contextos deveríamos ver um único documento, que é o que criamos antes.
 
 ~~~bash
 > db.posts.find();
