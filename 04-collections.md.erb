@@ -171,33 +171,33 @@ Abra a janela do segundo navegador e entre com esse comando no console do navega
 ~~~
 <%= caption "Second browser console" %>
 
-////
+O artigo está aqui também! Mesmo que não tenhamos atualizado ou até interagido com o segundo navegador, e nós certamente não escrevemos nenhum código para forçar a atualização dos dados. Tudo aconteceu magicamente -- e instantâneamente também, embora isso se torne mais óbvio mais tarde.
 
-////
+O que aconteceu é que nossa coleção do lado do servidor foi informado pela coleção do cliente de um novo artigo, e assumiu a tarefa de distribuir esse artigo no banco de dados Mongo e de volta para todas as outras coleções `post`.
 
-////
+Buscar artigos no console do navegador não é lá muito útil. Nós aprenderemos como ligar esse dado nos nossos templates, e durante o processo tornar nosso protótipo HTML simples em uma aplicação web funcional em tempo-real.
 
-### Keeping it Real-time
+### Mantendo em tempo-real
 
-////
+Olhando o conteúdo de nossas Coleções no console do navegador é uma coisa, mas o que nós realmente queremos fazer é mostrar o dado, e as mudanças nesse dado, na tela. Fazendo isso nós tornamos nossa aplicação de uma simples *página* mostrando dados estáticos, para uma *aplicação* web com dados mudando dinamicamente.
 
-////
+Vamos descobrir como.
 
-### Populating the Database
+### Populando o banco de dados
 
-////
+A primeira coisa que devemos fazer é colocar algum dado no banco de dados. Nós faremos com um arquivo pré-definido que carrega uma série de dados estruturados na coleção `Posts` quando o servidor é iniciado pela primeira vez.
 
-////
+Primeiro, vamos ter certeza que não há nada no banco de dados. Usaremos o comando `meteor reset`, que apaga nosso banco de dados e reseta nosso projeto. Claro que você deve ser muito cuidadoso com esse comando quando você estiver trabalhando em projetos da vida real.
 
-////
+Pare o servidor Meteor (pressionando `ctrl+c`) e portanto, na linha de comando, rode:
 
 ~~~bash
 $ meteor reset
 ~~~
 
-////
+O comando reset limpa completamente o banco de dados Mongo. É um comando muito útil durante o desenvolvimento, onde existe uma forte possibilidade de nosso banco de dados cair em um estado de inconsistência.
 
-////
+Agora que o banco de dados está vazio, podemos adicionar o seguinte código que irá carregar três artigos sempre que o servidor iniciar e encontrar a coleção `Posts` vazia:
 
 ~~~js
 if (Posts.find().count() === 0) {
@@ -222,24 +222,24 @@ if (Posts.find().count() === 0) {
 ~~~
 <%= caption "server/fixtures.js" %>
 
-<%= commit "4-2", "Added data to the posts collection." %>
+<%= commit "4-2", "Dados adicionados na coleção de artigos." %>
 
-////
+Nós colocamos esse arquivo no diretório `server/`, então nunca irá ser carregado em nenhum navegador do usuário. O código irá rodar imediatamente quando o servidor inicia, e fará chamadas `insert` no banco de dados para adicionar os três simples artigos na nossa coleção `Posts`. Como ainda não construímos nenhuma segurança de dados ainda, não existe diferença real entre fazer isso por arquivo no servidor ou no navegador.
 
-////
+Agora rode o servidor novamente com o comando `meteor`, e esses três artigos serão carregados no banco de dados.
 
-### Wiring the data to our HTML with helpers
+### Ligando os dados ao nosso HTML com helpers
 
-////
+Agora, se nós abrirmos o console do navegador, nós veremos os três artigos carregados no MiniMongo:
 
 ~~~js
 ❯ Posts.find().fetch();
 ~~~
 <%= caption "Browser console" %>
 
-////
+Para conseguir que esses artigos sejam renderizados em HTML, nós podemos usar um ajudante de template. No capítulo 3 nós vimos que Meteor nos permite vincular um *data context* ao nosso template Spacebars para construir views HTML de estruturas de dados simples. Nós podemos vincular em nossa coleção de dados da mesma maneira. Nós simplesmente substituímos nosso objeto estático JavaScript `postsData` por uma coleção dinâmica.
 
-////
+Falando dele, fique à vontade para deletar o código de `postsData` nesse ponto. A partir de agora nosso `posts_list.js` deve se parecer com:
 
 ~~~js
 Template.postsList.helpers({
@@ -251,15 +251,15 @@ Template.postsList.helpers({
 <%= caption "client/views/posts/posts_list.js" %>
 <%= highlight "2~4" %>
 
-<%= commit "4-3", "Wired collection into `postsList` template." %>
+<%= commit "4-3", "Coleção ligada no template `postsList`." %>
 
 <% note do %>
 
 ### Find & Fetch
 
-////
+No Meteor, `find()` retorna um *cursor*, que é uma [fonte de dados reativa](http://docs.meteor.com/#find). Quando nós queremos logar o seu conteúdo, nós precisamos usar `fetch()` naquele cursor para transformá-lo em um array.
 
-////
+Dentro de um app, Meteor é esperto o suficiente para sabe como iterar sobre cursores sem ter que explicitamente convertê-los em array primeiro. Essa é a resposta pela qual você não o verá frequentemente no código atual do Meteor (e por quê nós não usamos ele no exemplo logo acima).
 
 <% end %>
 
