@@ -140,7 +140,7 @@ Começaremos abrindo duas janelas do navegador, e o acesso ao console em cada um
 ~~~
 <%= caption "First browser console" %>
 
-////
+Vamos criar um novo artigo. Em uma das janelas do navegador, rode um comando de inserção:
 
 ~~~js
 ❯ Posts.find().count();
@@ -152,7 +152,7 @@ Começaremos abrindo duas janelas do navegador, e o acesso ao console em cada um
 ~~~
 <%= caption "First browser console" %>
 
-////
+Como era de se esperar, o artigo foi criado na coleção local. Vamos checar no Mongo:
 
 ~~~bash
 ❯ db.posts.find();
@@ -161,9 +161,9 @@ Começaremos abrindo duas janelas do navegador, e o acesso ao console em cada um
 ~~~
 <%= caption "The Mongo Shell" %>
 
-////
+Como você pode ver, o artigo foi criado até o banco de dados Mongo, sem escrevermos uma única linha de código que liga nosso cliente ao servidor (para ser mais preciso, escrevemos um _única_ linha de código: `new Meteor.Collection('posts')`). Mas isso não é tudo! 
 
-////
+Abra a janela do segundo navegador e entre com esse comando no console do navegador:
 
 ~~~js
 ❯ Posts.find().count();
