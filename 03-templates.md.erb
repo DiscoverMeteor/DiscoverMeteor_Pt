@@ -106,25 +106,25 @@ Nós mencionamos "ajudantes do template" bastante ao longo deste capítulo sem r
 
 ### Gerentes de Template
 
-////
+Até agora nós estávamos lidando com Handlebars, que nada mais é do que HTML acrescido de algumas tags especiais. Diferentemente de outras linguagens de programação como o PHP (ou até mesmo páginas HTML comuns, que podem incluir JavaScript), o Meteor mantém os templates e as lógicas separadas e esses templates não fazem muita coisa por si só.
 
-////
+Para fazer com que eles ganhem vida é necessário um **gerente**. Você pode pensar em um gerente como um chef de cozinha que pega os ingredientes crus (seus dados) e prepara eles antes de entregar o prato finalizado ao garçom (o template) que o apresenta a você.
 
-////
+Em outras palavras, enquanto o papel do template se limita a exibir ou iterar variáveis, o gerente é aquele que faz todo o trabalho pesado atribuindo valores para cada uma dessas variáveis.
 
 <% note do %>
 
-### Managers?
+### Gerentes?
 
-////
+Quando nós perguntarmos por aí a outros desenvolvedores Meteor como eles chamam esses "gerentes de template", metade respondeu "controllers" e a outra metade respondeu "aqueles arquivos onde eu coloco meu código JavaScript".
 
-////
+Gerentes não são de fato "controllers" (pelo menos não no sentido de controllers do MVC) e como a sigla "AAOECMCJ" (Aqueles Arquivos Onde Eu Coloco Meu Código Javascript) não é muito atraente, nós acabamos rejeitando as duas opções. 
 
-////
+Como ainda precisávamos usar um nome para indicar aquilo a que estávamos nos referindo, nós optamos pelo termo "gerente" como uma alternativa viável já que não tinha um significado relacionado a nenhum outro framework web.
 
 <% end %>
 
-////
+Para simplifcar as coisas, nós iremos adotar a mesma convenção de nomes utilizada para o template, com exceção da utilização da extensão  **.js**. Vamos criar o arquivo `posts_list.js` dentro do diretório `/client/views/posts` e começar a definir nosso primeiro gerente:
 
 ~~~js
 var postsData = [
