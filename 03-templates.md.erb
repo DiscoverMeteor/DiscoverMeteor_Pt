@@ -150,17 +150,15 @@ Template.postsList.helpers({
 ~~~
 <%= caption "client/views/posts/posts_list.js" %>
 
-////
+Se você fez tudo certo, algo parecido com isso irá aparecer no seu navegador:
 
-<%= screenshot "3-1", "Our first templates with static data" %>
+<%= screenshot "3-1", "Nosso primeiro template com dados estáticos" %>
 
-<%= commit "3-1", "Added basic posts list template and static data." %>
+<%= commit "3-1", "Template de listagem de posts e dados estáticos adicionados." %>
 
-////
+Nós estamos fazendo duas coisas aqui. Primeiro estamos colocando alguns dados de teste no array `postsData`. Esses dados normalmente seriam provenientes de um banco de dados, mas como ainda não vimos como acessá-lo (aguarde até o próximo capítulo) nós estamos "trapaceando" usando alguns dados estáticos. Depois estamos usando a função `Template.myTemplate.helpers()` do Meteor para definir um ajudante de template chamado `posts` que simplesmente nos retornará o array `postsData`.
 
-////
-
-////
+Definir o ajudante `posts` significa que ele agora estará disponível para ser usado pelo nosso template:  
 
 ~~~html
 <template name="postsList">
@@ -173,11 +171,11 @@ Template.postsList.helpers({
 ~~~
 <%= caption "client/views/posts/posts_list.html" %>
 
-////
+Agora será possível que nosso template itere sobre o array `postsData` e envie cada objeto contido dentro dele para o template `postItem`.
 
-### The Value of "this"
+### O valor do "this"
 
-////
+Nós iremos criar agora o gerente `post_item.js` 
 
 ~~~js
 Template.postItem.helpers({
@@ -190,19 +188,20 @@ Template.postItem.helpers({
 ~~~
 <%= caption "client/views/posts/post_item.js" %>
 
-<%= commit "3-2", "Setup a `domain` helper on the `postItem`." %>
+<%= commit "3-2", "Definição do ajudante `domain` no template `postItem`." %>
 
-////
+Desse vez o valor do ajudante `domain` não é um array, mas uma função anônima. Esse pattern é muito mais comum (e mais útil) se comparado aos nossos exemplos com dados de teste anteriores.
 
-<%= screenshot "3-2", "Displaying domains for each links." %>
 
-////
+<%= screenshot "3-2", "Exibindo os domínios de cada link." %>
 
-////
+O ajudante `domain` recebe uma URL e retorna seu domínio utilizando um pouco da mágica do Javascript. Mas, pra começar, de onde ela pega essa URL?
 
-////
+Para responder a essa pergunta nós precisamos voltar ao nosso template `posts_list.html`. O ajudante `{{#each}}` não apenas itera um array mas também **atribui o valor do `this` dentro do bloco do objeto iterado**.
 
-////
+Isso significa que entre as duas tags `{{#each}}`, cada post é atribuído ao `this` sucessivamente e isso também se aplica  ao gerente de template (`post_item.js`).
+
+Agora nós entendemos o porque do `this.url` retornar a URL do post atual. E além disso, se nós usarmos `{{title}}` e `{{url}}` dentro do nosso template `post_item.html`, o Meteor sabe que isso significa `this.title` e `this.url` e retorna os valores corretos.
 
 <% note do %>
 
