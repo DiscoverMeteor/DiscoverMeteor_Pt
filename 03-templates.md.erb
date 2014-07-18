@@ -205,26 +205,26 @@ Agora nós entendemos o porque do `this.url` retornar a URL do post atual. E al�
 
 <% note do %>
 
-### JavaScript Magic
+### Mágica do Javascript 
 
-////
+Embora isso não seja especifíco do Meteor, aqui vai uma breve explicação a respeito dessa pequena "mágica do Javascript" descrita acima. Primeiro, nós estamos criando um elemento HTML de âncora (`a`) vazio e armazenando-o na memória.
 
-////
+Depois colocamos em seu atributo `href` a URL do post atual (como nós já vimos, o `this` corresponde ao objeto sob a qual a ação está acontecendo).   
 
-////
+Por último, nós aproveitamos o fato de que o elemento `a` tem uma a propriedade especial chamada `hostname` para recuperar o nome de domínio do link sem o restante da URL.
 
 <% end %>
 
-////
+Se você seguiu tudo corretamente, deverá estar vendo agora uma lista de posts no seu navegador. Essa lista é composta apenas por dados estáticos, portanto ela ainda não tira vantagem dos recursos real-time do Meteor. Nós iremos mostrar como mudar isso no próximo capítulo! 
 
 <% note do %>
 
-### Hot Code Reload
+### Recarregamento Automático de Código
 
-////
+Você deve ter notado que não precisa nem recarregar a janela do seu navegador quando altera um arquivo.
 
-////
+Isso acontece porque o Meteor rastreia todos os arquivos dentro do diretório do seu projeto e automaticamente dá refresh no seu navegador sempre que detecta mudanças em algum desses arquivos.
 
-////
+O recarregamento automático de código do Meteor é bem esperto! Ele até preserva o estado da sua aplicação entre um refresh e outro!
 
 <% end %>
