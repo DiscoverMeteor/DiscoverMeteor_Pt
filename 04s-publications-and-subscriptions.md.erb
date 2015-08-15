@@ -8,11 +8,11 @@ contents: Aprenda como publicações e subscrições funcionam.|Aprenda o que o 
 paragraphs: 52
 ---
 
-Publicações e subscrições são uns dos mais importantes conceitos no Meteor, mas pode ser difícil ser difícil você entender enquanto está começando. 
+Publicações e subscrições são uns dos mais importantes conceitos no Meteor, mas pode ser difícil ser difícil você entender enquanto está começando.
 
 Isso levou a uma série de mal-entendidos, como a crença de que o Meteor é inseguro, ou que as aplicações Meteor não podem lidar com grandes quantidades de dados.
 
-Uma grande parcela do motivo das pessoas inicialmente acharem estes conceitos um pouco confusos é a "mágica" que o Meteor faz por nós. Embora essa mágica seja muito útil, ela pode obscurecer o que está de fato acontecendo por trás das cenas (o que uma mágica tende a fazer). Então vamos analisar as camadas dessa mágica e entender o que está acontecendo. 
+Uma grande parcela do motivo das pessoas inicialmente acharem estes conceitos um pouco confusos é a "mágica" que o Meteor faz por nós. Embora essa mágica seja muito útil, ela pode obscurecer o que está de fato acontecendo por trás das cenas (o que uma mágica tende a fazer). Então vamos analisar as camadas dessa mágica e entender o que está acontecendo.
 
 ### Os Velhos Tempos
 
@@ -42,7 +42,7 @@ Isso tem duas grandes implicações: primeira, ao invés de mandar código HTML 
 
 O banco de dados de um aplicativo pode conter dez mil documentos, sendo alguns destes privados ou sensíveis. Então obviamente não devemos simplesmente espelhar nosso banco de dados completamente no cliente, por razões de segurança e escabilidade.
 
-Então vamos precisar de uma forma de dizer ao Meteor quais **subgrupos** de dados podem ser enviados ao cliente, e vamos realizar isso através de uma **publicação**. 
+Então vamos precisar de uma forma de dizer ao Meteor quais **subgrupos** de dados podem ser enviados ao cliente, e vamos realizar isso através de uma **publicação**.
 
 Vamos voltar ao Microscope. Aqui estão todos os posts do no aplicativo situados no banco de dados:
 
@@ -69,17 +69,17 @@ Isso assegura para que **não exista uma forma** de um cliente estar apto a aces
 
 ### DDP
 
-Fundamentalmente, você pode pensar sobre o sistema de publicação/subscrição como um funil que transfere dados de uma coleção no lado do servidor para uma coleção no lado do cliente.  
+Fundamentalmente, você pode pensar sobre o sistema de publicação/subscrição como um funil que transfere dados de uma coleção no lado do servidor para uma coleção no lado do cliente.
 
 O protocolo que é utilizado neste funil é chamado **DDP** (que significa Distributed Data Protocol - Protocolo de Dados Distribuidos). Para aprender mais sobre DDP, você pode assistir [essa palestra da *Real-Time Conference*](http://2012.realtimeconf.com/video/matt-debergalis) por Matt DeBergalis (um dos fundadores do Meteor), ou [este screencast](http://www.eventedmind.com/posts/meteor-subscriptions-and-ddp) por Chris Mather que conduz você por este conceito com um pouco mais de detalhe.
 
 <% end %>
 
-### Subscrição 
+### Subscrição
 
 Mesmo que seja nossa intenção deixar qualquer publicação não marcada disponível para os clientes, nós não podemos simplesmente enviar milhares de publicações de uma vez. Nós precisamos de uma forma para os clientes especificarem qual subgrupo de dados eles precisam em um momento em particular, e é exatamente ai que as **subscrições** entram.
 
-Todo dado que você se subscrever vai ser **espelhado** no cliente graças ao Minimongo, a implementação do MongoDB feita pelo Meteor no lado do cliente. 
+Todo dado que você se subscrever vai ser **espelhado** no cliente graças ao Minimongo, a implementação do MongoDB feita pelo Meteor no lado do cliente.
 
 Por exemplo, vamos dizer que estamos atualmente navegando na página perfil de Bob Smith, e somente queremos mostrar **seus** posts.
 
@@ -94,7 +94,7 @@ Meteor.publish('posts', function(author) {
 });
 ~~~
 
-E podemos então definir este parâmetro quando nos *subscrevermos* nesta publicação no código do nosso aplicativo no lado do cliente: 
+E podemos então definir este parâmetro quando nos *subscrevermos* nesta publicação no código do nosso aplicativo no lado do cliente:
 
 ~~~js
 // no cliente
@@ -115,7 +115,7 @@ Da mesma forma que fizemos no servidor, nós vamos usar a função `Posts.find()
 // no cliente
 Template.posts.helpers({
   posts: function(){
-    return Posts.find(author: 'bob-smith', category: 'JavaScript');
+    return Posts.find({author: 'bob-smith', category: 'JavaScript'});
   }
 });
 ~~~
@@ -124,13 +124,13 @@ Agora que nós temos uma boa compreensão de como as publicações e subscriçõ
 
 ### Publicação Automática (autopublishing)
 
-Se você criar um projero Meteor do zero (i.e usando `meteor create`), ele vai ter automaticamente o pacote `autopublish` ativado. Para começar, vamos falar sobre o que ele exatamente faz.  
+Se você criar um projero Meteor do zero (i.e usando `meteor create`), ele vai ter automaticamente o pacote `autopublish` ativado. Para começar, vamos falar sobre o que ele exatamente faz.
 
 O objetivo do `autopublish` é deixar extremamente simples o início da codificação da sua aplicação Meteor, e ele faz isso espelhando automaticamente **todos os dados** do servidor para o cliente, tomando conta das publicações e subscrições para você.
 
 <%= diagram "autopublish", "Autopublish", "pull-center"%>
 
-Como isso funciona? Suponha que você tenha uma coleção chamada `'posts'` no servidor. Então `autopublish` vai automaticamente enviar cada post que encontrar na coleção *posts* no Mongo para uma coleção chamada `'posts'` no cliente (assumindo que exista um).  
+Como isso funciona? Suponha que você tenha uma coleção chamada `'posts'` no servidor. Então `autopublish` vai automaticamente enviar cada post que encontrar na coleção *posts* no Mongo para uma coleção chamada `'posts'` no cliente (assumindo que exista um).
 
 Se você estiver usando `autopublish`, você não precisa de pensar sobre publicações. Os dados serão ubíquos (presentes em todos os lugares), e as coisas se tornam simples. Claro, existem problema óbvios de ter uma cópia completa do banco de dados da sua aplicação *cacheada* na máquina de cada usuário.
 
